@@ -1,5 +1,6 @@
 import express from 'express';
 import request from 'request';
+import rpn from 'request-promise-native';
 
 import { log } from './index';
 
@@ -39,12 +40,64 @@ const postChatMessage = message => new Promise((resolve, reject) => {
   });
 });
 
+
+const checkStatus = url => new Promise((resolve, reject) => {
+  request.get({ url }, (err, res, body) => {
+    if (err) reject(err);
+    const { status, service_name, component_status } = JSON.parse(body);
+    console.log('status, service_name, component_status', status, service_name, component_status, body);
+    resolve({ status, service_name, component_status });
+  });
+});
+// Check IAM Status
+const checkIAM = async () => {
+  const iamUrls = [
+    'https://dev-tie-iam.mldev.cloud/status',
+    'https://dev-achieve-iam.mldev.cloud/status',
+    'https://int-achieve-iam.mldev.cloud/status',
+  ];
+  const promises = await iamUrls.map(async url => checkStatus(url));
+  const allPromises = await Promise.all(promises).then((complete) => {
+    console.log('complete', complete);
+    return complete;
+  });
+  return allPromises;
+};
+
+// Router
 const router = new express.Router();
 
 
 router.get('/', (req, res) => res.status(200).send('TIE ROBOT'));
 
 router.get('/status', (req, res) => res.status(200).send('okay'));
+router.get('/iam-status', async (req, res) => {
+  const iam = await checkIAM();
+  console.log('iam', iam);
+  res.json(iam);
+
+  const messageText = iam.map(({ status, service_name }) => `${service_name} is ${status}\n`);
+  console.log('messageText', messageText);
+
+  try {
+    const slackReqObj = req.body;
+    const response = {
+      response_type: 'in_channel',
+      channel: slackReqObj.channel_id,
+      text: '*IAM Status*',
+      attachments: [{
+        text: messageText,
+        fallback: messageText,
+        color: '#2c963f',
+        attachment_type: 'default',
+      }],
+    };
+    return res.json(response);
+  } catch (err) {
+    log.error(err);
+    return res.status(500).send('Something blew up. We\'re looking into it.');
+  }
+});
 
 router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
@@ -78,6 +131,43 @@ router.post('/slack/command/deploy', async (req, res) => {
             style: 'primary',
             type: 'button',
             value: JSON.stringify({ env, stack, service }),
+          },
+        ],
+      }],
+    };
+    return res.json(response);
+  } catch (err) {
+    log.error(err);
+    return res.status(500).send('Something blew up. We\'re looking into it.');
+  }
+});
+
+router.post('/slack/command/iam-status', async (req, res) => {
+  try {
+    const slackReqObj = req.body;
+    const response = {
+      response_type: 'in_channel',
+      channel: slackReqObj.channel_id,
+      text: `IAM Status :toaster:`,
+      attachments: [{
+        text: `IAM Status in 5 minutes`,
+        fallback: `IAM Status`,
+        color: '#2c963f',
+        attachment_type: 'default',
+        callback_id: 'deploy_msg',
+        actions: [
+          {
+            name: 'build',
+            text: 'Open Build Link',
+            type: 'button',
+            value: 'build',
+            url: 'https://boo.com',
+          },
+          {
+            name: 'announce',
+            text: 'Announce Build',
+            style: 'primary',
+            type: 'button',
           },
         ],
       }],
