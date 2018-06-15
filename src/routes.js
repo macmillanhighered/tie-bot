@@ -1,8 +1,11 @@
 import express from 'express';
 import request from 'request';
-import rpn from 'request-promise-native';
 
 import { log } from './index';
+
+const getSubdomain = (url) => {
+  return url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5})/i)[1];
+};
 
 const postChatMessage = message => new Promise((resolve, reject) => {
   const {
@@ -49,7 +52,7 @@ const checkStatus = url => new Promise((resolve, reject) => {
       status,
       service_name,
       component_status,
-      url
+      url,
     });
   });
 });
@@ -72,28 +75,6 @@ const router = new express.Router();
 router.get('/', (req, res) => res.status(200).send('TIE ROBOT'));
 
 router.get('/status', (req, res) => res.status(200).send('okay'));
-router.get('/iam-status', async (req, res) => {
-  const iam = await checkIAM();
-  const messageText = iam.map(({ status, service_name }) => `${service_name} is ${status}\n`);
-  try {
-    const slackReqObj = req.body;
-    const response = {
-      response_type: 'in_channel',
-      channel: slackReqObj.channel_id,
-      text: '*IAM Status*',
-      attachments: [{
-        text: messageText,
-        fallback: messageText,
-        color: '#2c963f',
-        attachment_type: 'default',
-      }],
-    };
-    return res.json(response);
-  } catch (err) {
-    log.error(err);
-    return res.status(500).send('Something blew up. We\'re looking into it.');
-  }
-});
 
 router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
@@ -139,33 +120,19 @@ router.post('/slack/command/deploy', async (req, res) => {
 });
 
 router.post('/slack/command/iam-status', async (req, res) => {
+  const iam = await checkIAM();
+  const messageText = iam.map(({ status, url }) => `*${getSubdomain(url)}* is ${status} ${status === 'UP' ? ':green:' : ':red:'}\n`);
   try {
     const slackReqObj = req.body;
     const response = {
       response_type: 'in_channel',
       channel: slackReqObj.channel_id,
-      text: `IAM Status :toaster:`,
+      text: '*IAM Status*',
       attachments: [{
-        text: `IAM Status in 5 minutes`,
-        fallback: `IAM Status`,
+        text: messageText,
+        fallback: messageText,
         color: '#2c963f',
         attachment_type: 'default',
-        callback_id: 'deploy_msg',
-        actions: [
-          {
-            name: 'build',
-            text: 'Open Build Link',
-            type: 'button',
-            value: 'build',
-            url: 'https://boo.com',
-          },
-          {
-            name: 'announce',
-            text: 'Announce Build',
-            style: 'primary',
-            type: 'button',
-          },
-        ],
       }],
     };
     return res.json(response);
