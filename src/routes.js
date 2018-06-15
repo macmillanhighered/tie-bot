@@ -141,7 +141,7 @@ router.post('/slack/command/iam-status', async (req, res) => {
     const response = {
       response_type: 'in_channel',
       channel: slackReqObj.channel_id,
-      text: '*IAM Status*',
+      text: '*Stack Status* :linuxterm:',
       attachments: [{
         text: messageText,
         fallback: messageText,
