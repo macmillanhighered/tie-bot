@@ -89,7 +89,9 @@ router.post('/slack/command/deploy', async (req, res) => {
   const [env, stack, service] = split;
   const rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
   const buildUrl = `${rootUrl}build?delay=300sec`;
-  const startBuild = `${rootUrl}buildWithParameters?delay=300sec&ENV_NAME=${stack}&BRANCH=master`;
+  // it is potentially possible to pass the build params and
+  // start the build automagically but requires a post command
+  // `${rootUrl}buildWithParameters?delay=300sec&ENV_NAME=${stack}&BRANCH=master`;
   try {
     const slackReqObj = req.body;
     const response = {
@@ -110,13 +112,6 @@ router.post('/slack/command/deploy', async (req, res) => {
             type: 'button',
             value: 'build',
             url: buildUrl,
-          },
-          {
-            name: 'build',
-            text: `Queue ${env}-${stack}-${service} Build (Auto)`,
-            type: 'button',
-            value: 'build',
-            url: startBuild,
           },
           {
             name: 'announce',
