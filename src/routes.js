@@ -59,13 +59,13 @@ const checkStatus = url => new Promise((resolve, reject) => {
     });
   });
 });
-const triggerBuild = url => new Promise((resolve, reject) => {
-  console.log('url', url);
-  request.post({ url }, (err, response) => {
-    if (err) reject(err);
-    resolve(response);
-  });
-});
+// const triggerBuild = url => new Promise((resolve, reject) => {
+//   console.log('url', url);
+//   request.post({ url }, (err, response) => {
+//     if (err) reject(err);
+//     resolve(response);
+//   });
+// });
 // Check IAM Status
 const checkIAM = async () => {
   const iamUrls = [
@@ -96,8 +96,7 @@ router.get('/status', (req, res) => res.status(200).send('okay'));
 router.get('/jenkins/build/:arg', (req, res) => {
   const { params: { arg } } = req;
   const split = arg.split('-');
-  const [env, stack, service] = split;
-  console.log('env', env);
+  const [, stack, service] = split;
 
   const rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
   const buildUrl = `${rootUrl}buildWithParameters?delay=300sec&ENV_NAME=${stack}&BRANCH=master`;
@@ -229,10 +228,9 @@ export const pages = {
 const pagesArray = Object.keys(pages);
 
 router.get(pagesArray, async (req, res) => {
-  console.log('req.path', req.path);
   const htmlProps = {
-    title: pages[req.path] || fourOhFour,
-    bundleUrl: `/static/bundle.js`,
+    title: pages[req.path] || '404',
+    bundleUrl: '/static/bundle.js',
   };
   res.send(ReactDOMServer.renderToStaticMarkup(<Html {...htmlProps} />));
 });

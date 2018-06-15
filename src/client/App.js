@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 const Wrap = styled.div`
@@ -17,17 +17,11 @@ const Wrap = styled.div`
   }
 `;
 
-export default class App extends Component {
-  constructor(props) {
-    super(props);
-  }
+const App = () => (
+  <Wrap>
+    <img alt="TIE-bot" src="/static/tie-bot-icon.png" />
+    <h2>TIE-bot</h2>
+  </Wrap>
+);
 
-  render() {
-    return (
-      <Wrap>
-        <img src="/static/tie-bot-icon.png" />
-        <h2>TIE-bot</h2>
-      </Wrap>
-    );
-  }
-}
+export default App;
