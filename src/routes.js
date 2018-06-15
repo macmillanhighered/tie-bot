@@ -129,7 +129,7 @@ router.post('/slack/command/iam-status', async (req, res) => {
       channel: slackReqObj.channel_id,
       text: '*IAM Status*',
       attachments: [{
-        text: messageText,
+        text: JSON.stringify(iam),
         fallback: 'No status',
         color: '#2c963f',
         attachment_type: 'default',
