@@ -56,6 +56,13 @@ const checkStatus = url => new Promise((resolve, reject) => {
     });
   });
 });
+const triggerBuild = url => new Promise((resolve, reject) => {
+  console.log('url', url);
+  request.post({ url }, (err, response) => {
+    if (err) reject(err);
+    resolve(response);
+  });
+});
 // Check IAM Status
 const checkIAM = async () => {
   const iamUrls = [
@@ -82,6 +89,19 @@ const router = new express.Router();
 router.get('/', (req, res) => res.status(200).send('TIE ROBOT'));
 
 router.get('/status', (req, res) => res.status(200).send('okay'));
+
+router.get('/jenkins/build/:arg', (req, res) => {
+  const { params: { arg } } = req;
+  const split = arg.split('-');
+  const [env, stack, service] = split;
+  console.log('env', env);
+
+  const rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
+  const buildUrl = `${rootUrl}buildWithParameters?delay=300sec&ENV_NAME=${stack}&BRANCH=master`;
+  // const buildResult = await triggerBuild(buildUrl);
+  // console.log('buildResult', env, buildResult);
+  res.redirect(buildUrl);
+});
 
 router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
