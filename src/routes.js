@@ -65,6 +65,11 @@ const checkIAM = async () => {
     'https://dev-achieve-iam.mldev.cloud/status',
     'https://int-achieve-iam.mldev.cloud/status',
     'https://services-live.macmillantech.com/status',
+    'https://dev-tie-courseware.mldev.cloud/status',
+    'https://dev-achieve-courseware.mldev.cloud/status',
+    'https://int-achieve-courseware.mldev.cloud/status',
+    'https://dev-achieve-plat.mldev.cloud/status',
+    'https://int-achieve-plat.mldev.cloud/status',
   ];
   const promises = await iamUrls.map(async url => checkStatus(url));
   const allPromises = await Promise.all(promises);
