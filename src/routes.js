@@ -130,7 +130,7 @@ router.post('/slack/command/iam-status', async (req, res) => {
       text: '*IAM Status*',
       attachments: [{
         text: messageText,
-        fallback: messageText,
+        fallback: 'No status',
         color: '#2c963f',
         attachment_type: 'default',
       }],
