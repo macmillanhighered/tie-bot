@@ -10,6 +10,12 @@
       "url": "https://github.com/heroku/heroku-buildpack-nodejs"
     }
   ],
+  "env": {
+    "WEB_CONCURRENCY": {
+      "description": "The number of processes to run.",
+      "generator": "echo 5"
+    }
+  },
   "scripts": {
     "dokku": {
       "predeploy": "yarn build"
