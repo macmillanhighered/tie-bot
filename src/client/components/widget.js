@@ -1,7 +1,8 @@
-import styled from 'styled-components'
-import { size } from 'polished'
-import LoadingIndicator from './loading-indicator'
-import ErrorIcon from './error-icon'
+import React from 'react';
+import styled from 'styled-components';
+import { size } from 'polished';
+import LoadingIndicator from './loading-indicator';
+import ErrorIcon from './error-icon';
 
 const Container = styled.div`
   ${size('20em')}
@@ -13,21 +14,26 @@ const Container = styled.div`
   justify-content: center;
   margin: 1em;
   padding: 1em;
-`
+`;
 
 const Title = styled.h1`
   text-align: center;
-`
+`;
 
-export default ({ children, error = false, loading = false, title = '' }) => {
-  let content
+export default ({
+  children,
+  error = false,
+  loading = false,
+  title = '',
+}) => {
+  let content;
 
   if (loading) {
-    content = <LoadingIndicator />
+    content = <LoadingIndicator />;
   } else if (error) {
-    content = <ErrorIcon />
+    content = <ErrorIcon />;
   } else {
-    content = <div>{children}</div>
+    content = <div>{children}</div>;
   }
 
   return (
@@ -35,5 +41,5 @@ export default ({ children, error = false, loading = false, title = '' }) => {
       {title ? <Title>{title}</Title> : ''}
       {content}
     </Container>
-  )
-}
+  );
+};

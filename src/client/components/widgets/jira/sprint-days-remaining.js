@@ -1,76 +1,82 @@
-import { Component } from 'react'
-import fetch from 'isomorphic-unfetch'
-import { object, string, number } from 'yup'
-import Widget from '../../widget'
-import Counter from '../../counter'
-import { basicAuthHeader } from '../../../lib/auth'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import fetch from 'isomorphic-unfetch';
+import { object, string, number } from 'yup';
+
+import Widget from '../../widget';
+import Counter from '../../counter';
+import { basicAuthHeader } from '../../auth';
 
 const schema = object().shape({
   url: string().url().required(),
   boardId: number().required(),
   interval: number(),
   title: string(),
-  authKey: string()
-})
+  authKey: string(),
+});
 
 export default class JiraSprintDaysRemaining extends Component {
+  static propTypes = {
+    title: PropTypes.string,
+    interval: PropTypes.number,
+  }
   static defaultProps = {
     interval: 1000 * 60 * 60,
-    title: 'JIRA Sprint Days Remaining'
+    title: 'JIRA Sprint Days Remaining',
   }
 
   state = {
     days: 0,
     error: false,
-    loading: true
+    loading: true,
   }
 
-  componentDidMount () {
+  componentDidMount() {
     schema.validate(this.props)
       .then(() => this.fetchInformation())
       .catch((err) => {
-        console.error(`${err.name} @ ${this.constructor.name}`, err.errors)
-        this.setState({ error: true, loading: false })
-      })
+        console.error(`${err.name} @ ${this.constructor.name}`, err.errors);
+        this.setState({ error: true, loading: false });
+      });
   }
 
-  componentWillUnmount () {
-    clearTimeout(this.timeout)
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
   }
 
-  calculateDays (date) {
-    const currentDate = new Date()
-    const endDate = new Date(date)
-    const timeDiff = endDate.getTime() - currentDate.getTime()
-    const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24))
+  calculateDays = (date) => {
+    const currentDate = new Date();
+    const endDate = new Date(date);
+    const timeDiff = endDate.getTime() - currentDate.getTime();
+    const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-    return diffDays
+    return diffDays;
   }
 
-  async fetchInformation () {
-    const { authKey, boardId, url } = this.props
-    const opts = authKey ? { headers: basicAuthHeader(authKey) } : {}
+  async fetchInformation() {
+    const { authKey, boardId, url } = this.props;
+    const opts = authKey ? { headers: basicAuthHeader(authKey) } : {};
 
     try {
-      const res = await fetch(`${url}/rest/agile/1.0/board/${boardId}/sprint?state=active`, opts)
-      const json = await res.json()
-      const days = this.calculateDays(json.values[0].endDate)
+      const res = await fetch(`${url}/rest/agile/1.0/board/${boardId}/sprint?state=active`, opts);
+      const json = await res.json();
+      const days = this.calculateDays(json.values[0].endDate);
 
-      this.setState({ days, error: false, loading: false })
+      this.setState({ days, error: false, loading: false });
     } catch (error) {
-      this.setState({ error: true, loading: false })
+      this.setState({ error: true, loading: false });
     } finally {
-      this.timeout = setTimeout(() => this.fetchInformation(), this.props.interval)
+      this.timeout = setTimeout(() => this.fetchInformation(), this.props.interval);
     }
   }
 
-  render () {
-    const { days, error, loading } = this.state
-    const { title } = this.props
+  render() {
+    const { days, error, loading } = this.state;
+    const { title } = this.props;
     return (
       <Widget title={title} loading={loading} error={error}>
         <Counter value={days} />
       </Widget>
-    )
+    );
   }
 }

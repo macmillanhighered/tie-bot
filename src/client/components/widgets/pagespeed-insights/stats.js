@@ -1,62 +1,67 @@
-import { Component } from 'react'
-import fetch from 'isomorphic-unfetch'
-import { object, string, boolean, number } from 'yup'
-import Table, { Th, Td } from '../../table'
-import Widget from '../../widget'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import fetch from 'isomorphic-unfetch';
+import { object, string, boolean, number } from 'yup';
+import Table, { Th, Td } from '../../table';
+import Widget from '../../widget';
 
 const schema = object().shape({
   url: string().url().required(),
   filterThirdPartyResources: boolean(),
   interval: number(),
   strategy: string(),
-  title: string()
-})
+  title: string(),
+});
 
 export default class PageSpeedInsightsStats extends Component {
+  static propTypes = {
+    title: PropTypes.string,
+    strategy: PropTypes.string,
+    interval: PropTypes.number,
+    filterThirdPartyResources: PropTypes.bool,
+  }
   static defaultProps = {
     filterThirdPartyResources: false,
     interval: 1000 * 60 * 60 * 12,
     strategy: 'desktop',
-    title: 'PageSpeed Stats'
+    title: 'PageSpeed Stats',
   }
 
   state = {
     stats: {},
     loading: true,
-    error: false
+    error: false,
   }
 
-  componentDidMount () {
+  componentDidMount() {
     schema.validate(this.props)
       .then(() => this.fetchInformation())
       .catch((err) => {
-        console.error(`${err.name} @ ${this.constructor.name}`, err.errors)
-        this.setState({ error: true, loading: false })
-      })
+        console.error(`${err.name} @ ${this.constructor.name}`, err.errors);
+        this.setState({ error: true, loading: false });
+      });
   }
 
-  componentWillUnmount () {
-    clearTimeout(this.timeout)
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
   }
 
-  bytesToKilobytes (bytes) {
-    return bytes > 0 ? (bytes / 1024).toFixed(1) : 0
-  }
+  bytesToKilobytes = bytes => (bytes > 0 ? (bytes / 1024).toFixed(1) : 0)
 
-  async fetchInformation () {
-    const { url, filterThirdPartyResources, strategy } = this.props
+  async fetchInformation() {
+    const { url, filterThirdPartyResources, strategy } = this.props;
 
     const searchParams = [
       `url=${url}`,
       `filter_third_party_resources=${filterThirdPartyResources}`,
-      `strategy=${strategy}`
-    ].join('&')
+      `strategy=${strategy}`,
+    ].join('&');
 
     try {
-      const res = await fetch(`https://www.googleapis.com/pagespeedonline/v2/runPagespeed?${searchParams}`)
-      const json = await res.json()
+      const res = await fetch(`https://www.googleapis.com/pagespeedonline/v2/runPagespeed?${searchParams}`);
+      const json = await res.json();
 
-      const pageStats = json.pageStats
+      const { pageStats } = json;
       const stats = {
         cssCount: pageStats.numberCssResources || 0,
         cssSize: this.bytesToKilobytes(pageStats.cssResponseBytes),
@@ -66,20 +71,20 @@ export default class PageSpeedInsightsStats extends Component {
         javascriptSize: this.bytesToKilobytes(pageStats.javascriptResponseBytes),
         requestCount: pageStats.numberResources || 0,
         requestSize: this.bytesToKilobytes(pageStats.totalRequestBytes),
-        otherSize: this.bytesToKilobytes(pageStats.otherResponseBytes)
-      }
+        otherSize: this.bytesToKilobytes(pageStats.otherResponseBytes),
+      };
 
-      this.setState({ error: false, loading: false, stats })
+      this.setState({ error: false, loading: false, stats });
     } catch (error) {
-      this.setState({ error: true, loading: false })
+      this.setState({ error: true, loading: false });
     } finally {
-      this.timeout = setTimeout(() => this.fetchInformation(), this.props.interval)
+      this.timeout = setTimeout(() => this.fetchInformation(), this.props.interval);
     }
   }
 
-  render () {
-    const { error, loading, stats } = this.state
-    const { title } = this.props
+  render() {
+    const { error, loading, stats } = this.state;
+    const { title } = this.props;
     return (
       <Widget title={title} loading={loading} error={error}>
         <Table>
@@ -116,6 +121,6 @@ export default class PageSpeedInsightsStats extends Component {
           </tbody>
         </Table>
       </Widget>
-    )
+    );
   }
 }

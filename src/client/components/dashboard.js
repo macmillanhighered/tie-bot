@@ -1,6 +1,6 @@
-import Head from 'next/head'
-import styled, { injectGlobal, ThemeProvider } from 'styled-components'
-import { normalize } from 'polished'
+import React from 'react';
+import styled, { injectGlobal, ThemeProvider } from 'styled-components';
+import { normalize } from 'polished';
 
 injectGlobal`
   ${normalize()}
@@ -8,7 +8,7 @@ injectGlobal`
   html {
     font-family: 'Roboto', sans-serif;
   }
-`
+`;
 
 const Container = styled.main`
   align-items: center;
@@ -17,21 +17,14 @@ const Container = styled.main`
   display: flex;
   flex-flow: row wrap;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100%;
   padding: 1em;
-`
+`;
 
 export default ({ children, theme }) => (
   <ThemeProvider theme={theme}>
     <Container>
-      <Head>
-        <link
-          href='https://fonts.googleapis.com/css?family=Roboto:300,400,500'
-          rel='stylesheet'
-        />
-      </Head>
-
       {children}
     </Container>
   </ThemeProvider>
-)
+);

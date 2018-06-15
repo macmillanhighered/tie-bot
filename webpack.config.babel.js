@@ -4,7 +4,7 @@ import HtmlWebPackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 const htmlWebpackPlugin = new HtmlWebPackPlugin({
-  template: `${__dirname}/src/client/public/index.html`,
+  template: `${__dirname}/src/client/static/index.html`,
   filename: `${__dirname}/dist/index.html`,
   hash: true,
 });
@@ -18,7 +18,7 @@ const config = {
     filename: 'bundle.js',
   },
   devServer: {
-    contentBase: `${__dirname}/src/client/public`,
+    contentBase: `${__dirname}/src/client`,
   },
   node: {
     fs: 'empty',
@@ -39,7 +39,7 @@ const config = {
     htmlWebpackPlugin,
     new CopyWebpackPlugin([
       {
-        from: `${__dirname}/src/client/public/`,
+        from: `${__dirname}/src/client/static/`,
         to: `${__dirname}/dist/`,
       },
     ]),

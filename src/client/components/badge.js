@@ -1,5 +1,5 @@
-import styled from 'styled-components'
-import { size } from 'polished'
+import styled from 'styled-components';
+import { size } from 'polished';
 
 export default styled.span`
   ${size('1.75em')}
@@ -9,4 +9,4 @@ export default styled.span`
   display: inline-block;
   line-height: 1.75em;
   text-align: center;
-`
+`;
