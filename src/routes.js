@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import express from 'express';
 import request from 'request';
 
@@ -47,7 +48,8 @@ const postChatMessage = message => new Promise((resolve, reject) => {
 const checkStatus = url => new Promise((resolve, reject) => {
   request.get({ url }, (err, res, body) => {
     if (err) reject(err);
-    const { status, service_name, component_status } = JSON.parse(body);
+    const parsed = JSON.parse(body);
+    const { status = 'UP', service_name, component_status } = parsed;
     resolve({
       status,
       service_name,
@@ -62,6 +64,7 @@ const checkIAM = async () => {
     'https://dev-tie-iam.mldev.cloud/status',
     'https://dev-achieve-iam.mldev.cloud/status',
     'https://int-achieve-iam.mldev.cloud/status',
+    'https://services-live.macmillantech.com/status',
   ];
   const promises = await iamUrls.map(async url => checkStatus(url));
   const allPromises = await Promise.all(promises);
@@ -153,7 +156,12 @@ router.post('/slack/actions', async (req, res) => {
     const slackReqObj = JSON.parse(req.body.payload);
     const { channel } = slackReqObj;
     const { actions: [action] } = slackReqObj;
-    const { env, stack, service, url } = JSON.parse(action.value);
+    const {
+      env,
+      stack,
+      service,
+      url,
+    } = JSON.parse(action.value);
     let response;
     if (slackReqObj.callback_id === 'deploy_msg') {
       response = {
