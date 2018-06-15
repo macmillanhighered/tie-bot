@@ -42,9 +42,9 @@ const postChatMessage = message => new Promise((resolve, reject) => {
 const router = new express.Router();
 
 
-router.get('/status', (req, res) => {
-  return res.status(200).send('okay');
-});
+router.get('/', (req, res) => res.status(200).send('TIE ROBOT'));
+
+router.get('/status', (req, res) => res.status(200).send('okay'));
 
 router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
