@@ -21,6 +21,7 @@ const App = () => (
   <Wrap>
     <img alt="TIE-bot" src="/static/tie-bot-icon.png" />
     <h2>TIE-bot</h2>
+    <small>v1.0.1</small>
   </Wrap>
 );
 
