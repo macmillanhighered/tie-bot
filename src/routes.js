@@ -4,9 +4,7 @@ import request from 'request';
 
 import { log } from './index';
 
-const getSubdomain = (url) => {
-  return url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5})/i)[1];
-};
+const getSubdomain = url => url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5})/i)[1];
 
 const postChatMessage = message => new Promise((resolve, reject) => {
   const {
