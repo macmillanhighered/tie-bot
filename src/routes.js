@@ -119,9 +119,9 @@ router.post('/slack/command/deploy', async (req, res) => {
   }
 });
 
-router.post('/slack/command/iam-status', async (req, res) => {
+router.get('/slack/command/iam-status', async (req, res) => {
   const iam = await checkIAM();
-  const messageText = iam.map(({ status, url }) => `*${getSubdomain(url)}* is ${status} ${status === 'UP' ? ':green:' : ':red:'}\n`);
+  const messageText = iam.map(({ status, url }) => `*${getSubdomain(url)}* is ${status} ${status === 'UP' ? ':green:' : ':red:'}`).join('\n');
   try {
     const slackReqObj = req.body;
     const response = {
@@ -129,7 +129,7 @@ router.post('/slack/command/iam-status', async (req, res) => {
       channel: slackReqObj.channel_id,
       text: '*IAM Status*',
       attachments: [{
-        text: JSON.stringify(iam),
+        text: messageText,
         fallback: 'No status',
         color: '#2c963f',
         attachment_type: 'default',
