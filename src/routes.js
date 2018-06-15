@@ -80,7 +80,7 @@ router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
   const split = text.split('-');
   const [env, stack, service] = split;
-  const url: rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
+  const rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
   const buildUrl = `${url: rootUrl}build?delay=300sec`;
   try {
     const slackReqObj = req.body;
