@@ -80,7 +80,8 @@ router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
   const split = text.split('-');
   const [env, stack, service] = split;
-  const url = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/build?delay=300sec`;
+  const url: rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
+  const buildUrl = `${url: rootUrl}build?delay=300sec`;
   try {
     const slackReqObj = req.body;
     const response = {
@@ -90,7 +91,7 @@ router.post('/slack/command/deploy', async (req, res) => {
       attachments: [{
         text: `Deploy ${env}-${stack}-${service} in 5 minutes`,
         fallback: `Deploy ${env}-${stack}-${service}`,
-        title_link: url,
+        title_link: buildUrl,
         color: '#2c963f',
         attachment_type: 'default',
         callback_id: 'deploy_msg',
@@ -100,14 +101,19 @@ router.post('/slack/command/deploy', async (req, res) => {
             text: 'Open Build Link',
             type: 'button',
             value: 'build',
-            url,
+            url: buildUrl,
           },
           {
             name: 'announce',
             text: 'Announce Build',
             style: 'primary',
             type: 'button',
-            value: JSON.stringify({ env, stack, service }),
+            value: JSON.stringify({
+              env,
+              stack,
+              service,
+              url: rootUrl,
+            }),
           },
         ],
       }],
@@ -147,7 +153,7 @@ router.post('/slack/actions', async (req, res) => {
     const slackReqObj = JSON.parse(req.body.payload);
     const { channel } = slackReqObj;
     const { actions: [action] } = slackReqObj;
-    const { env, stack, service } = JSON.parse(action.value);
+    const { env, stack, service, url } = JSON.parse(action.value);
     let response;
     if (slackReqObj.callback_id === 'deploy_msg') {
       response = {
@@ -162,8 +168,8 @@ router.post('/slack/actions', async (req, res) => {
       replaceOriginal: false,
       text: `*TIE Deploy Notification* :deathstar: *${env}-${stack}-${service}*`,
       attachments: [{
-        text: `*${env}-${stack}-${service}* will build and deploy in 5 minutes`,
-        fallback: `*${env}-${stack}-${service}* will build and deploy in 5 minutes`,
+        text: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
+        fallback: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
         color: '#2c963f',
         attachment_type: 'default',
       }],
