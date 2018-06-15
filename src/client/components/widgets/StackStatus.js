@@ -23,6 +23,7 @@ const StackWrap = styled.div`
     li {
       display: flex;
       flex-direction: row;
+      align-items: center;
     }
   }
 `;
