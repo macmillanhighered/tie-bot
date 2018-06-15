@@ -61,15 +61,16 @@ const checkStatus = url => new Promise((resolve, reject) => {
 // Check IAM Status
 const checkIAM = async () => {
   const iamUrls = [
-    'https://dev-tie-iam.mldev.cloud/status',
-    'https://dev-achieve-iam.mldev.cloud/status',
-    'https://int-achieve-iam.mldev.cloud/status',
     'https://services-live.macmillantech.com/status',
-    'https://dev-tie-courseware.mldev.cloud/status',
-    'https://dev-achieve-courseware.mldev.cloud/status',
-    'https://int-achieve-courseware.mldev.cloud/status',
-    'https://dev-achieve-plat.mldev.cloud/status',
+    'https://int-achieve-iam.mldev.cloud/status',
     'https://int-achieve-plat.mldev.cloud/status',
+    'https://int-achieve-courseware.mldev.cloud/status',
+    'https://dev-achieve-iam.mldev.cloud/status',
+    'https://dev-achieve-plat.mldev.cloud/status',
+    'https://dev-achieve-courseware.mldev.cloud/status',
+    'https://dev-tie-iam.mldev.cloud/status',
+    'https://dev-tie-plat.mldev.cloud/status',
+    'https://dev-tie-courseware.mldev.cloud/status',
   ];
   const promises = await iamUrls.map(async url => checkStatus(url));
   const allPromises = await Promise.all(promises);
@@ -141,7 +142,7 @@ router.post('/slack/command/iam-status', async (req, res) => {
     const response = {
       response_type: 'in_channel',
       channel: slackReqObj.channel_id,
-      text: '*Stack Status* :linuxterm:',
+      text: ':linuxterm: *Stack Status*',
       attachments: [{
         text: messageText,
         fallback: messageText,
