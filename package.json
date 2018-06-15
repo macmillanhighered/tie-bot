@@ -8,8 +8,8 @@
     "build": "rm -rf ./dist/ && babel src --out-dir dist/ --copy-files && yarn client-build",
     "prod": "NODE_ENV=production node dist/index.js",
     "predeploy": "yarn lint",
-    "deploy": "git push dokku master",
-    "lint": "eslint src --fix",
+    "deploy": "git diff-index --quiet HEAD -- && git push dokku master",
+    "lint": "[[ -z $(git status -s) ]] && eslint src --fix",
     "client-dev": "webpack-dev-server --mode development --history-api-fallback --port 8082",
     "client-build": "BABEL_DISABLE_CACHE=1 webpack --config webpack.config.babel.js --mode production"
   },
@@ -38,9 +38,7 @@
     "styled-components": "^3.3.2",
     "tracer": "^0.9.0",
     "webpack-cli": "^3.0.7",
-    "webpack": "^4.12.0"
-  },
-  "devDependencies": {
+    "webpack": "^4.12.0",
     "babel-eslint": "^8.2.3",
     "babel-loader": "^7.1.4",
     "babel-preset-es2017": "^6.24.1",
