@@ -10,7 +10,7 @@
     "predeploy": "yarn lint && [[ -z $(git status -s) ]]",
     "deploy": "git diff-index --quiet HEAD -- && git push dokku master",
     "lint": "eslint src --fix",
-    "client-dev": "webpack-dev-server --mode development --history-api-fallback --port 8082",
+    "client-dev": "webpack-dev-server --mode development --history-api-fallback --port 8082 --content-base client/public/",
     "client-build": "BABEL_DISABLE_CACHE=1 webpack --config webpack.config.babel.js --mode production"
   },
   "dependencies": {
