@@ -1,7 +1,10 @@
 /* eslint-disable camelcase */
 import express from 'express';
 import request from 'request';
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 
+import Html from './Html';
 import { log } from './index';
 
 const getSubdomain = url => url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5})/i)[1];
@@ -86,7 +89,7 @@ const checkIAM = async () => {
 const router = new express.Router();
 
 
-router.get('/', (req, res) => res.status(200).send('TIE ROBOT'));
+// router.get('/', (req, res) => res.status(200).send('TIE ROBOT'));
 
 router.get('/status', (req, res) => res.status(200).send('okay'));
 
@@ -215,6 +218,23 @@ router.post('/slack/actions', async (req, res) => {
     log.error(err);
     return res.status(500).send('Something blew up. We\'re looking into it.');
   }
+});
+
+// client
+
+export const pages = {
+  '/': 'TIE-bot',
+};
+
+const pagesArray = Object.keys(pages);
+
+router.get(pagesArray, async (req, res) => {
+  console.log('req.path', req.path);
+  const htmlProps = {
+    title: pages[req.path] || fourOhFour,
+    bundleUrl: `/static/bundle.js`,
+  };
+  res.send(ReactDOMServer.renderToStaticMarkup(<Html {...htmlProps} />));
 });
 
 export default router;
