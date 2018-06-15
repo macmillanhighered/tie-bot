@@ -1,1 +1,1 @@
-deployed
+deploy_successful
