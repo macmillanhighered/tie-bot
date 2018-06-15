@@ -16,7 +16,7 @@ export const log = (() => {
 const app = express();
 app.start = async () => {
   log.info('Starting Server...');
-  const port = 8000;
+  const port = 5000;
   app.set('port', port);
 
   app.use(bodyParser.json());
