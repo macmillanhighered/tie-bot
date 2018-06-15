@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "dokku": {
-      "predeploy": "touch /app/predeploy.test"
+      "predeploy": "npm run build"
     }
   }
 }
