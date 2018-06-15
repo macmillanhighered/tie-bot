@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'request';
 
-import { log } from './utils';
+import { log } from './index';
 
 const postChatMessage = message => new Promise((resolve, reject) => {
   const {

@@ -1,5 +1,4 @@
 import 'babel-polyfill';
-import config from 'config';
 import express from 'express';
 import http from 'http';
 import bodyParser from 'body-parser';
@@ -8,24 +7,16 @@ import tracer from 'tracer';
 
 import routes from './routes';
 
-// utils
 export const log = (() => {
   const logger = tracer.colorConsole();
   logger.requestLogger = morgan('dev');
   return logger;
 })();
 
-export const normalizePort = (val) => {
-  const port = parseInt(val, 10);
-  if (Number.isNaN(port)) return val;
-  if (port >= 0) return port;
-  return false;
-};
-
 const app = express();
 app.start = async () => {
   log.info('Starting Server...');
-  const port = normalizePort(config.get('port'));
+  const port = 8000;
   app.set('port', port);
 
   app.use(bodyParser.json());
