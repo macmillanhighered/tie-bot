@@ -45,8 +45,12 @@ const checkStatus = url => new Promise((resolve, reject) => {
   request.get({ url }, (err, res, body) => {
     if (err) reject(err);
     const { status, service_name, component_status } = JSON.parse(body);
-    console.log('status, service_name, component_status', status, service_name, component_status, body);
-    resolve({ status, service_name, component_status });
+    resolve({
+      status,
+      service_name,
+      component_status,
+      url
+    });
   });
 });
 // Check IAM Status
@@ -57,10 +61,7 @@ const checkIAM = async () => {
     'https://int-achieve-iam.mldev.cloud/status',
   ];
   const promises = await iamUrls.map(async url => checkStatus(url));
-  const allPromises = await Promise.all(promises).then((complete) => {
-    console.log('complete', complete);
-    return complete;
-  });
+  const allPromises = await Promise.all(promises);
   return allPromises;
 };
 
@@ -73,12 +74,7 @@ router.get('/', (req, res) => res.status(200).send('TIE ROBOT'));
 router.get('/status', (req, res) => res.status(200).send('okay'));
 router.get('/iam-status', async (req, res) => {
   const iam = await checkIAM();
-  console.log('iam', iam);
-  res.json(iam);
-
   const messageText = iam.map(({ status, service_name }) => `${service_name} is ${status}\n`);
-  console.log('messageText', messageText);
-
   try {
     const slackReqObj = req.body;
     const response = {
