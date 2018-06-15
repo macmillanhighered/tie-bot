@@ -10,10 +10,11 @@
       "url": "https://github.com/heroku/heroku-buildpack-nodejs"
     }
   ],
+  "image": "gliderlabs/herokuish",
   "env": {
     "WEB_CONCURRENCY": {
       "description": "The number of processes to run.",
-      "generator": "echo 5"
+      "generator": "echo 3"
     }
   },
   "scripts": {
