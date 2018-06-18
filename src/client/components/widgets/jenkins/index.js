@@ -53,7 +53,7 @@ export default class Jenkins extends Component {
     schema.validate(this.props)
       .then(() => this.fetchInformation())
       .catch((err) => {
-        console.error(`${err.name} @ ${this.constructor.name}`, err.errors);
+        console.error(`${err.name} @ ${this.constructor.name}`, err);
         this.setState({ error: true, loading: false });
       });
   }

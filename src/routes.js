@@ -109,9 +109,6 @@ const checkIAM = async () => {
 // Router
 const router = new express.Router();
 
-
-// router.get('/', (req, res) => res.status(200).send('TIE ROBOT'));
-
 router.get('/status', (req, res) => res.status(200).send('okay'));
 
 router.get('/jenkins/build/:arg', (req, res) => {

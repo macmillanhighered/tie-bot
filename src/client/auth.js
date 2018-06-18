@@ -23,4 +23,5 @@ export default {
     username: process.env.GITHUB_USER,
     password: process.env.GITHUB_PASS,
   },
+  jenkinsAuth: 'eb0a2f8dce71af45fd1bab297d1df726',
 };

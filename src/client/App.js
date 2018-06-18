@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import Dashboard from './components/dashboard';
 import DateTime from './components/widgets/datetime';
+import Jenkins from './components/widgets/jenkins';
 import Widget from './components/widget';
 import StackStatus from './components/widgets/StackStatus';
 import PageSpeedInsightsStats from './components/widgets/pagespeed-insights/stats';
@@ -28,6 +29,17 @@ const Wrap = styled.div`
   }
 `;
 
+const jenkCfg = {
+  url: 'http://jenkins.mldev.cloud/job/TIE',
+  authKey: 'jenkinsAuth',
+  title: 'Jenkins TIE',
+  jobs: [
+    { label: 'IAM', path: 'iam deploy' },
+    { label: 'Plat', path: 'plat deploy' },
+    { label: 'Log', path: 'log deploy' },
+  ],
+};
+
 const App = () => (
   <Wrap>
     <Dashboard theme={darkTheme}>
@@ -35,6 +47,7 @@ const App = () => (
         <img className="icon" alt="TIE-bot" src="/static/tie-bot-icon.png" />
         <br /><small>v1.0.1</small>
       </Widget>
+      <Jenkins {...jenkCfg} />
       <StackStatus />
       <DateTime />
       <Widget title="AustinCam">

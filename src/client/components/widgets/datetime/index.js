@@ -40,8 +40,8 @@ export default class DateTime extends Component {
     const { date } = this.state;
     return (
       <Widget>
-        <TimeItem>{tinytime('{H}:{mm}').render(date)}</TimeItem>
-        <DateItem>{tinytime('{DD}.{Mo}.{YYYY}').render(date)}</DateItem>
+        <TimeItem>{tinytime('{h}:{mm} {a}').render(date)}</TimeItem>
+        <DateItem>{tinytime('{Mo}.{DD}.{YYYY}').render(date)}</DateItem>
       </Widget>
     );
   }
