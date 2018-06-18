@@ -121,7 +121,7 @@ router.post('/slack/command/deploy', async (req, res) => {
       channel: slackReqObj.channel_id,
       text: `Deploy ${env}-${stack}-${service} :toaster:`,
       attachments: [{
-        text: `Deploy ${env}-${stack}-${service} in 5 minutes [${slackReqObj.user_id}]`,
+        text: `Deploy ${env}-${stack}-${service} in 5 minutes [${slackReqObj.username}]`,
         fallback: `Deploy ${env}-${stack}-${service}`,
         title_link: buildUrl,
         color: '#2c963f',
