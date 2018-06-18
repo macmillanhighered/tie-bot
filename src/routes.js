@@ -27,7 +27,7 @@ const slackmoji = [
   ':porg:',
   ':r2d2:',
   ':jenkins:',
-  ':zorak':,
+  ':zorak:',
 ];
 
 const postChatMessage = message => new Promise((resolve, reject) => {
