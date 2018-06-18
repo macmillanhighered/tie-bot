@@ -20,11 +20,14 @@ const slackmoji = [
   ':doge:',
   ':badass:',
   ':crossed_fingers:',
-  ':skin-tone-3:',
   ':c3po:',
   ':pink-unicorn:',
   ':gir2:',
   ':linuxterm:',
+  ':porg:',
+  ':r2d2:',
+  ':jenkins:',
+  ':zorak':,
 ];
 
 const postChatMessage = message => new Promise((resolve, reject) => {
