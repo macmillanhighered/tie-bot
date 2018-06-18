@@ -228,7 +228,7 @@ router.post('/slack/actions', async (req, res) => {
     const message = {
       responseUrl: slackReqObj.response_url,
       replaceOriginal: false,
-      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}* [started by  <@${user_id}>]`,
+      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}* [started by <@${user_id}>]`,
       attachments: [{
         text: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
         fallback: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
