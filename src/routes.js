@@ -24,7 +24,7 @@ const slackmoji = [
   ':c3po:',
   ':pink-unicorn:',
   ':gir2:',
-  ':linuxterm:'
+  ':linuxterm:',
 ];
 
 const postChatMessage = message => new Promise((resolve, reject) => {
