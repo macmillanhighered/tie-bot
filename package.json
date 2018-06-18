@@ -11,7 +11,7 @@
     "deploy": "git diff-index --quiet HEAD -- && git push dokku master",
     "lint": "eslint src --fix",
     "client-dev": "webpack-dev-server --mode development --history-api-fallback --port 8082 --content-base src/client/static/",
-    "client-build": "BABEL_DISABLE_CACHE=1 webpack --watch --config webpack.config.babel.js --mode production"
+    "client-build": "BABEL_DISABLE_CACHE=1 webpack --config webpack.config.babel.js --mode production"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
