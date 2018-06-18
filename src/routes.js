@@ -2,12 +2,30 @@
 import express from 'express';
 import request from 'request';
 import React from 'react';
+import Chance from 'chance';
 import ReactDOMServer from 'react-dom/server';
 
 import Html from './Html';
 import { log } from './index';
 
 const getSubdomain = url => url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5})/i)[1];
+
+const chance = new Chance();
+
+const slackmoji = [
+  ':yodawg:',
+  ':sea_otter:',
+  ':easy:',
+  ':ewok:',
+  ':doge:',
+  ':badass:',
+  ':crossed_fingers:',
+  ':skin-tone-3:',
+  ':c3po:',
+  ':pink-unicorn:',
+  ':gir2:',
+  ':linuxterm:'
+];
 
 const postChatMessage = message => new Promise((resolve, reject) => {
   const {
@@ -121,7 +139,7 @@ router.post('/slack/command/deploy', async (req, res) => {
       channel: slackReqObj.channel_id,
       text: `Deploy ${env}-${stack}-${service} :toaster:`,
       attachments: [{
-        text: `Deploy ${env}-${stack}-${service} in 5 minutes [${slackReqObj.username}]`,
+        text: `Deploy ${env}-${stack}-${service} in 5 minutes [<@${slackReqObj.user_id}>]`,
         fallback: `Deploy ${env}-${stack}-${service}`,
         title_link: buildUrl,
         color: '#2c963f',
@@ -208,7 +226,7 @@ router.post('/slack/actions', async (req, res) => {
     const message = {
       responseUrl: slackReqObj.response_url,
       replaceOriginal: false,
-      text: `*TIE Deploy Notification* :linuxterm: *${env}-${stack}-${service}*`,
+      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}*`,
       attachments: [{
         text: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
         fallback: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
