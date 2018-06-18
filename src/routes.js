@@ -139,7 +139,7 @@ router.post('/slack/command/deploy', async (req, res) => {
       channel: slackReqObj.channel_id,
       text: `Deploy ${env}-${stack}-${service} :toaster:`,
       attachments: [{
-        text: `Deploy ${env}-${stack}-${service} in 5 minutes [<@${slackReqObj.user_id}>]`,
+        text: `Deploy ${env}-${stack}-${service} in 5 minutes`,
         fallback: `Deploy ${env}-${stack}-${service}`,
         title_link: buildUrl,
         color: '#2c963f',
@@ -162,6 +162,7 @@ router.post('/slack/command/deploy', async (req, res) => {
               env,
               stack,
               service,
+              user_id: slackReqObj.user_id,
               url: rootUrl,
             }),
           },
@@ -212,6 +213,7 @@ router.post('/slack/actions', async (req, res) => {
       env,
       stack,
       service,
+      user_id,
       url,
     } = JSON.parse(action.value);
     let response;
@@ -226,7 +228,7 @@ router.post('/slack/actions', async (req, res) => {
     const message = {
       responseUrl: slackReqObj.response_url,
       replaceOriginal: false,
-      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}*`,
+      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}* [started by  <@${user_id}>]`,
       attachments: [{
         text: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
         fallback: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
