@@ -36,7 +36,7 @@ const jenkCfg = {
   jobs: [
     { label: 'IAM', path: 'iam deploy' },
     { label: 'Plat', path: 'plat deploy' },
-    { label: 'Log', path: 'log deploy' },
+    { label: 'Lof', path: 'lof deploy' },
   ],
 };
 

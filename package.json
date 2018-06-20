@@ -4,7 +4,7 @@
   "main": "./dist/index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development babel-watch src/index.js",
+    "dev": "NODE_ENV=development babel-watch src/index.js & yarn client-dev",
     "build": "rm -rf ./dist/ && babel src --out-dir dist/ --copy-files && yarn client-build",
     "prod": "NODE_ENV=production node dist/index.js",
     "predeploy": "yarn lint && [[ -z $(git status -s) ]]",
@@ -41,6 +41,7 @@
     "js-base64": "^2.4.5",
     "mkdirp": "^0.5.1",
     "morgan": "^1.9.0",
+    "octonode": "^0.9.2",
     "polished": "^1.9.2",
     "prop-types": "^15.6.1",
     "react": "^16.4.1",

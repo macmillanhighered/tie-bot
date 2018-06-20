@@ -4,6 +4,7 @@ import request from 'request';
 import React from 'react';
 import Chance from 'chance';
 import ReactDOMServer from 'react-dom/server';
+import github from 'octonode';
 
 import Html from './Html';
 import { log } from './index';
@@ -110,6 +111,62 @@ const checkIAM = async () => {
 const router = new express.Router();
 
 router.get('/status', (req, res) => res.status(200).send('okay'));
+
+router.get('/github/:repo', (req, res) => {
+  const { repo } = req.params;
+  const ghclient = github.client(process.env.GITHUB_TOKEN);
+  ghclient.get(`/repos/macmillanhighered/${repo}/pulls`, {}, (err, status, body) => {
+    if (err) console.error('err', err);
+    res.status(status).send(JSON.stringify(body, null, 2));
+  });
+});
+
+router.get('/github/prs', async (req, res) => {
+  const ghclient = github.client(process.env.GITHUB_TOKEN);
+  ghclient.get('/repos/macmillanhighered/ml-iam/pulls', {}, async (err, status, iam) => {
+    await ghclient.get('/repos/macmillanhighered/plat-services/pulls', {}, (perr, stat, plat) => {
+      if (err) console.error('err', err);
+      res.status(status).send({ iam, plat });
+    });
+  });
+});
+
+router.post('/slack/command/gh/pulls', async (req, res) => {
+  const { body: { text } } = req;
+  try {
+    const ghclient = github.client(process.env.GITHUB_TOKEN);
+    return ghclient.get(`/repos/macmillanhighered/${text}/pulls`, {}, (err, status, prarray) => {
+      if (err) console.error('err', err);
+      const messageString = prarray.map(({
+        title,
+        url,
+        requested_reviewers,
+        number,
+      }) => {
+        const reviewersString = requested_reviewers.map(({ login }) => `*${login}*`).join(', ');
+        const prString = `[${title}](${url}) [${number}]: ${reviewersString}`;
+        return prString;
+      }).join('\n');
+      // res.status(status).send(prarray);
+      const slackReqObj = req.body;
+      const response = {
+        response_type: 'in_channel',
+        channel: slackReqObj.channel_id,
+        text: `:linuxterm: *Open ${text} PRs*`,
+        attachments: [{
+          text: messageString,
+          fallback: messageString,
+          color: '#2c963f',
+          attachment_type: 'default',
+        }],
+      };
+      return res.json(response);
+    });
+  } catch (err) {
+    log.error(err);
+    return res.status(500).send('Something blew up. We\'re looking into it.');
+  }
+});
 
 router.get('/jenkins/build/:arg', (req, res) => {
   const { params: { arg } } = req;
