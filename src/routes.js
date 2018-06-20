@@ -70,15 +70,26 @@ const postChatMessage = message => new Promise((resolve, reject) => {
 
 const checkStatus = url => new Promise((resolve, reject) => {
   request.get({ url }, (err, res, body) => {
+    console.log('body', body);
     if (err) reject(err);
-    const parsed = JSON.parse(body);
-    const { status = 'UP', service_name, component_status } = parsed;
-    resolve({
-      status,
-      service_name,
-      component_status,
-      url,
-    });
+    try {
+      const parsed = JSON.parse(body) || {};
+      const { status = 'UP', service_name, component_status } = parsed;
+      resolve({
+        status,
+        service_name,
+        component_status,
+        url,
+      });
+    } catch (error) {
+      console.log('error', error);
+      resolve({
+        status: 'DOWN',
+        error,
+        service_name: url,
+        url,
+      });
+    }
   });
 });
 // const triggerBuild = url => new Promise((resolve, reject) => {
