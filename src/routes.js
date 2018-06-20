@@ -155,7 +155,7 @@ router.post('/slack/command/gh/pulls', async (req, res) => {
         number,
       }) => {
         const reviewersString = requested_reviewers.map(({ login }) => `*${login}*`).join(', ');
-        const prString = `[${title}](${url}) [${number}]: ${reviewersString}`;
+        const prString = `${number} [${title}](${url}): ${reviewersString}`;
         return prString;
       }).join('\n');
       // res.status(status).send(prarray);
@@ -167,6 +167,7 @@ router.post('/slack/command/gh/pulls', async (req, res) => {
         attachments: [{
           text: messageString,
           fallback: messageString,
+          mrkdwn_in: ['text'],
           color: '#2c963f',
           attachment_type: 'default',
         }],
