@@ -152,10 +152,9 @@ router.post('/slack/command/gh/pulls', async (req, res) => {
         title,
         url,
         requested_reviewers,
-        number,
       }) => {
         const reviewersString = requested_reviewers.map(({ login }) => `*${login}*`).join(', ');
-        const prString = `${number} [${title}](${url}): ${reviewersString}`;
+        const prString = `${title}: ${reviewersString}\n${url}`;
         return prString;
       }).join('\n');
       // res.status(status).send(prarray);
