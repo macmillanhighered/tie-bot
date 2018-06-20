@@ -106,9 +106,9 @@ const checkIAM = async () => {
     'https://int-achieve-iam.mldev.cloud/status',
     'https://int-achieve-plat.mldev.cloud/status',
     'https://int-achieve-courseware.mldev.cloud/status',
+    'https://dev-achieve-courseware.mldev.cloud/status',
     'https://dev-achieve-iam.mldev.cloud/status',
     'https://dev-achieve-plat.mldev.cloud/status',
-    'https://dev-achieve-courseware.mldev.cloud/status',
     'https://dev-tie-iam.mldev.cloud/status',
     'https://dev-tie-plat.mldev.cloud/status',
     'https://dev-tie-courseware.mldev.cloud/status',
@@ -163,7 +163,7 @@ router.post('/slack/command/gh/pulls', async (req, res) => {
       const response = {
         response_type: 'in_channel',
         channel: slackReqObj.channel_id,
-        text: `:linuxterm: *Open ${text} PRs*`,
+        text: `:octocat: *Open ${text} PRs*`,
         attachments: [{
           text: messageString,
           fallback: messageString,
@@ -252,7 +252,7 @@ router.get('/reports/stack', async (req, res) => {
 
 router.post('/slack/command/iam-status', async (req, res) => {
   const iam = await checkIAM();
-  const messageText = iam.map(({ status, url }) => `${status === 'UP' ? ':green:' : ':red:'} *${getSubdomain(url)}* is ${status}`).join('\n');
+  const messageText = iam.map(({ status, url }) => `${status === 'UP' ? ':green:' : ':broken_heart:'} *[${getSubdomain(url)}](url)* is ${status}`).join('\n');
   try {
     const slackReqObj = req.body;
     const response = {
@@ -262,6 +262,7 @@ router.post('/slack/command/iam-status', async (req, res) => {
       attachments: [{
         text: messageText,
         fallback: messageText,
+        mrkdwn_in: ['text'],
         color: '#2c963f',
         attachment_type: 'default',
       }],
