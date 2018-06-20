@@ -251,7 +251,7 @@ router.get('/reports/stack', async (req, res) => {
 
 router.post('/slack/command/iam-status', async (req, res) => {
   const iam = await checkIAM();
-  const messageText = iam.map(({ status, url }) => `${status === 'UP' ? ':green:' : ':broken_heart:'} *[${getSubdomain(url)}](url)* is ${status}`).join('\n');
+  const messageText = iam.map(({ status, url }) => `${status === 'UP' ? ':green:' : ':broken_heart:'} *${getSubdomain(url)}* is ${status}`).join('\n');
   try {
     const slackReqObj = req.body;
     const response = {
