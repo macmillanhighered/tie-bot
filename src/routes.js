@@ -70,7 +70,6 @@ const postChatMessage = message => new Promise((resolve, reject) => {
 
 const checkStatus = url => new Promise((resolve, reject) => {
   request.get({ url }, (err, res, body) => {
-    console.log('body', body);
     if (err) reject(err);
     try {
       const parsed = JSON.parse(body) || {};
@@ -82,7 +81,7 @@ const checkStatus = url => new Promise((resolve, reject) => {
         url,
       });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
       resolve({
         status: 'DOWN',
         error,
@@ -251,7 +250,7 @@ router.get('/reports/stack', async (req, res) => {
 
 router.post('/slack/command/iam-status', async (req, res) => {
   const iam = await checkIAM();
-  const messageText = iam.map(({ status, url }) => `${status === 'UP' ? ':green:' : ':broken_heart:'} *${getSubdomain(url)}* is ${status}`).join('\n');
+  const messageText = iam.map(({ status, url }) => `${status === 'UP' ? ':green:' : ':broken_heart:'} *${getSubdomain(url)}* is ${status}${status !== 'UP' ? `\n${url}` : ''}`).join('\n');
   try {
     const slackReqObj = req.body;
     const response = {
