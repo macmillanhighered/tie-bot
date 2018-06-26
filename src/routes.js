@@ -104,7 +104,7 @@ const checkIAM = async () => {
     'https://prod-green-iam.prod-mml.cloud/status',
     'https://prod-green-courseware.prod-mml.cloud/status',
     'https://prod-green-plat.prod-mml.cloud/status',
-    'https://prod-blue-iam.prod-mml.cloud/status',
+    'https://prod-green-reading.prod-mml.cloud/status',
     'https://services-live.macmillantech.com/status',
     'https://int-achieve-iam.mldev.cloud/status',
     'https://int-achieve-plat.mldev.cloud/status',
