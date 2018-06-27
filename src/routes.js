@@ -197,7 +197,7 @@ router.get('/jenkins/build/:arg', (req, res) => {
 router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
   const split = text.split('-');
-  const [env, stack, service] = split;
+  const [env, stack, service, branch] = split;
   const rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
   const buildUrl = `${rootUrl}build?delay=300sec`;
   // it is potentially possible to pass the build params and
@@ -208,7 +208,7 @@ router.post('/slack/command/deploy', async (req, res) => {
     const response = {
       response_type: 'ephemeral',
       channel: slackReqObj.channel_id,
-      text: `Deploy ${env}-${stack}-${service} :toaster:`,
+      text: `Deploy ${env}-${stack}-${service} :toaster:${branch ? ` from branch ${branch}` : ''}`,
       attachments: [{
         text: `Deploy ${env}-${stack}-${service} in 5 minutes`,
         fallback: `Deploy ${env}-${stack}-${service}`,
@@ -233,6 +233,7 @@ router.post('/slack/command/deploy', async (req, res) => {
               env,
               stack,
               service,
+              branch,
               user_id: slackReqObj.user_id,
               url: rootUrl,
             }),
@@ -285,6 +286,7 @@ router.post('/slack/actions', async (req, res) => {
       env,
       stack,
       service,
+      branch,
       user_id,
       url,
     } = JSON.parse(action.value);
@@ -300,7 +302,7 @@ router.post('/slack/actions', async (req, res) => {
     const message = {
       responseUrl: slackReqObj.response_url,
       replaceOriginal: false,
-      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}* [started by <@${user_id}>]`,
+      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}*${branch ? ` from branch ${branch}` : ''} [started by <@${user_id}>]`,
       attachments: [{
         text: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
         fallback: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
