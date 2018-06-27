@@ -203,13 +203,13 @@ router.post('/slack/command/deploy', async (req, res) => {
   const buildUrl = `${rootUrl}build?delay=300sec`;
   // it is potentially possible to pass the build params and
   // start the build automagically but requires a post command
-  // `${rootUrl}buildWithParameters?delay=300sec&ENV_NAME=${stack}&BRANCH=master`;
+  // `${rootUrl}buildWithParameters?delay=300sec&ENV_NAME=${stack}&BRANCH=${branch}`;
   try {
     const slackReqObj = req.body;
     const response = {
       response_type: 'ephemeral',
       channel: slackReqObj.channel_id,
-      text: `Deploy ${env}-${stack}-${service} :toaster:${branch ? ` from branch *${branch}*` : ''}`,
+      text: `Deploy *${env}-${stack}-${service}*${branch ? ` from branch _${branch}_` : ''} :toaster:`,
       attachments: [{
         text: `Deploy ${env}-${stack}-${service} in 5 minutes`,
         fallback: `Deploy ${env}-${stack}-${service}`,
@@ -303,7 +303,7 @@ router.post('/slack/actions', async (req, res) => {
     const message = {
       responseUrl: slackReqObj.response_url,
       replaceOriginal: false,
-      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}*${branch ? ` from branch ${branch}` : ''} [started by <@${user_id}>]`,
+      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}*${branch ? ` from branch _${branch}_` : ''} [started by <@${user_id}>]`,
       attachments: [{
         text: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
         fallback: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
