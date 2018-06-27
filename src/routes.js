@@ -197,7 +197,7 @@ router.get('/jenkins/build/:arg', (req, res) => {
 router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
   const branch = text.split(':')[1] || null;
-  const split = text.split('-');
+  const split = text.split(':')[0].split('-');
   const [env, stack, service] = split;
   const rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
   const buildUrl = `${rootUrl}build?delay=300sec`;
@@ -209,7 +209,7 @@ router.post('/slack/command/deploy', async (req, res) => {
     const response = {
       response_type: 'ephemeral',
       channel: slackReqObj.channel_id,
-      text: `Deploy ${env}-${stack}-${service} :toaster:${branch ? ` from branch ${branch}` : ''}`,
+      text: `Deploy ${env}-${stack}-${service} :toaster:${branch ? ` from branch *${branch}*` : ''}`,
       attachments: [{
         text: `Deploy ${env}-${stack}-${service} in 5 minutes`,
         fallback: `Deploy ${env}-${stack}-${service}`,
