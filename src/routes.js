@@ -196,8 +196,9 @@ router.get('/jenkins/build/:arg', (req, res) => {
 
 router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
+  const branch = text.split(':')[1] || null;
   const split = text.split('-');
-  const [env, stack, service, branch] = split;
+  const [env, stack, service] = split;
   const rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
   const buildUrl = `${rootUrl}build?delay=300sec`;
   // it is potentially possible to pass the build params and
