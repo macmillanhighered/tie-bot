@@ -335,7 +335,7 @@ router.post('/slack/command/bot', async (req, res) => {
   helpText += '*/tie-bot help* - This documentation';
   try {
     const slackReqObj = req.body;
-    if (text !== '' || text !== 'help') {
+    if (text !== '' && text !== 'help') {
       return res.json({
         response_type: 'ephemeral',
         channel: slackReqObj.channel_id,
