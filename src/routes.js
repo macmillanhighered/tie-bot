@@ -9,6 +9,8 @@ import github from 'octonode';
 import Html from './Html';
 import { log } from './index';
 
+const { version } = '../package.json';
+
 const getSubdomain = url => url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5})/i)[1];
 const chance = new Chance();
 
@@ -321,6 +323,34 @@ router.post('/slack/actions', async (req, res) => {
     return res.status(500).send('Something blew up. We\'re looking into it.');
   }
 });
+
+
+router.post('/slack/command/bot', async (req, res) => {
+  const { body: { text } } = req;
+  console.log('text', text);
+  let helpText = '*/tie-deploy [env]-[stack]-[service]:[branch]* - e.g. `/tie-deploy int-achieve-iam:master`\n';
+  helpText += 'Displays links to delayed build and automated announcement message. *NOTE: Does not start the build for you*\n';
+  helpText += '*/stack-status* - Display list of Achieve server status';
+  try {
+    const slackReqObj = req.body;
+    const response = {
+      response_type: 'ephemeral',
+      channel: slackReqObj.channel_id,
+      text: `TIE-bot Help :: v${version}`,
+      attachments: [{
+        text: helpText,
+        mrkdwn: true,
+        color: '#2c963f',
+        attachment_type: 'default',
+      }],
+    };
+    return res.json(response);
+  } catch (err) {
+    log.error(err);
+    return res.status(500).send('Something blew up. We\'re looking into it.');
+  }
+});
+
 
 // client
 
