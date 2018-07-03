@@ -9,7 +9,7 @@ import github from 'octonode';
 import Html from './Html';
 import { log } from './index';
 
-const { version } = '../package.json';
+const { version } = './package.json';
 
 const getSubdomain = url => url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5})/i)[1];
 const chance = new Chance();
@@ -327,16 +327,23 @@ router.post('/slack/actions', async (req, res) => {
 
 router.post('/slack/command/bot', async (req, res) => {
   const { body: { text } } = req;
-  console.log('text', text);
   let helpText = '*/tie-deploy [env]-[stack]-[service]:[branch]*';
   helpText += '\n • e.g. `/tie-deploy int-achieve-iam:master`';
-  helpText += '\n • Displays links to delayed build and automated announcement message.'
+  helpText += '\n • Displays links to delayed build and automated announcement message.';
   helpText += '\n • _NOTE: Does not start the build for you_\n';
   helpText += '*/stack-status* - Display list of Achieve server status';
   helpText += '*/tie-bot help* - This documentation';
   try {
     const slackReqObj = req.body;
-    const response = {
+    if (text !== '' || text !== 'help') {
+      return res.json({
+        response_type: 'ephemeral',
+        channel: slackReqObj.channel_id,
+        mrkdwn: true,
+        text: 'TIE-bot :: I didn\'t understand that command. Try `/tie-bot help`',
+      });
+    }
+    return res.json({
       response_type: 'ephemeral',
       channel: slackReqObj.channel_id,
       text: `TIE-bot Help :: v${version}`,
@@ -346,8 +353,7 @@ router.post('/slack/command/bot', async (req, res) => {
         color: '#2c963f',
         attachment_type: 'default',
       }],
-    };
-    return res.json(response);
+    });
   } catch (err) {
     log.error(err);
     return res.status(500).send('Something blew up. We\'re looking into it.');
