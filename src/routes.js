@@ -10,9 +10,9 @@ import Html from './Html';
 import { log } from './index';
 
 const getSubdomain = url => url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5})/i)[1];
-
 const chance = new Chance();
 
+const buildDelay = 10;
 const slackmoji = [
   ':yodawg:',
   ':sea_otter:',
@@ -199,8 +199,11 @@ router.post('/slack/command/deploy', async (req, res) => {
   const branch = text.split(':')[1] || null;
   const split = text.split(':')[0].split('-');
   const [env, stack, service] = split;
-  const rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
-  const buildUrl = `${rootUrl}build?delay=300sec`;
+  let rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
+  if (!['plat', 'iam', 'courseware'].includes(stack)) {
+    rootUrl = 'http://jenkins.mldev.cloud/job/SRE/job/Unified_Deploy_Pipeline/';
+  }
+  const buildUrl = `${rootUrl}build?delay=${buildDelay}sec`;
   // it is potentially possible to pass the build params and
   // start the build automagically but requires a post command
   // `${rootUrl}buildWithParameters?delay=300sec&ENV_NAME=${stack}&BRANCH=${branch}`;
@@ -211,7 +214,7 @@ router.post('/slack/command/deploy', async (req, res) => {
       channel: slackReqObj.channel_id,
       text: `Deploy *${env}-${stack}-${service}*${branch ? ` from branch _${branch}_` : ''} :toaster:`,
       attachments: [{
-        text: `Deploy ${env}-${stack}-${service} in 5 minutes`,
+        text: `Deploy ${env}-${stack}-${service} in ${buildDelay} minutes`,
         fallback: `Deploy ${env}-${stack}-${service}`,
         title_link: buildUrl,
         color: '#2c963f',
@@ -220,14 +223,14 @@ router.post('/slack/command/deploy', async (req, res) => {
         actions: [
           {
             name: 'build',
-            text: 'Open Build Link',
+            text: 'Open Deploy Link',
             type: 'button',
             value: 'build',
             url: buildUrl,
           },
           {
             name: 'announce',
-            text: 'Announce Build',
+            text: 'Announce Deploy',
             style: 'primary',
             type: 'button',
             value: JSON.stringify({
@@ -303,10 +306,10 @@ router.post('/slack/actions', async (req, res) => {
     const message = {
       responseUrl: slackReqObj.response_url,
       replaceOriginal: false,
-      text: `*TIE Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}*${branch ? ` from branch _${branch}_` : ''} [started by <@${user_id}>]`,
+      text: `*TIE-bot Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}*${branch ? ` from branch _${branch}_` : ''} [started by <@${user_id}>]`,
       attachments: [{
-        text: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
-        fallback: `*${env}-${stack}-${service}* will build and deploy in 5 minutes\n${url}`,
+        text: `*${env}-${stack}-${service}* will build and deploy in ${buildDelay} minutes\n${url}`,
+        fallback: `*${env}-${stack}-${service}* will build and deploy in ${buildDelay} minutes\n${url}`,
         color: '#2c963f',
         attachment_type: 'default',
       }],
