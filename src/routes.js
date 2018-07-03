@@ -200,7 +200,8 @@ router.post('/slack/command/deploy', async (req, res) => {
   const { body: { text } } = req;
   const branch = text.split(':')[1] || null;
   const split = text.split(':')[0].split('-');
-  const [env, stack, service] = split;
+  const [env, stack, ...serviceSplitArray] = split;
+  const service = serviceSplitArray.join('');
   let rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
   if (!['plat', 'iam', 'courseware'].includes(stack)) {
     rootUrl = 'http://jenkins.mldev.cloud/job/SRE/job/Unified_Deploy_Pipeline/';
