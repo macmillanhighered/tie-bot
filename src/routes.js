@@ -328,9 +328,12 @@ router.post('/slack/actions', async (req, res) => {
 router.post('/slack/command/bot', async (req, res) => {
   const { body: { text } } = req;
   console.log('text', text);
-  let helpText = '*/tie-deploy [env]-[stack]-[service]:[branch]* - e.g. `/tie-deploy int-achieve-iam:master`\n';
-  helpText += 'Displays links to delayed build and automated announcement message. *NOTE: Does not start the build for you*\n';
+  let helpText = '*/tie-deploy [env]-[stack]-[service]:[branch]*';
+  helpText += '\n • e.g. `/tie-deploy int-achieve-iam:master`';
+  helpText += '\n • Displays links to delayed build and automated announcement message.'
+  helpText += '\n • _NOTE: Does not start the build for you_\n';
   helpText += '*/stack-status* - Display list of Achieve server status';
+  helpText += '*/tie-bot help* - This documentation';
   try {
     const slackReqObj = req.body;
     const response = {
