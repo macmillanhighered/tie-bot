@@ -34,7 +34,7 @@ const slackmoji = {
   ':zorak:': 1,
 };
 
-const getConfig = (path) => {
+const getConfig = () => {
   const configObj = config();
   const keys = Object.keys(configObj).filter(key => key.includes('PIPELINE_BRANCH'));
   const branches = {};
