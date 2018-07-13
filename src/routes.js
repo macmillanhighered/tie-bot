@@ -5,6 +5,7 @@ import React from 'react';
 import Chance from 'chance';
 import ReactDOMServer from 'react-dom/server';
 import github from 'octonode';
+import { config } from './config';
 
 import Html from './Html';
 import { log } from './index';
@@ -15,23 +16,33 @@ const getSubdomain = url => url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5}
 const chance = new Chance();
 
 const buildDelay = 10;
-const slackmoji = [
-  ':yodawg:',
-  ':sea_otter:',
-  ':easy:',
-  ':ewok:',
-  ':doge:',
-  ':badass:',
-  ':crossed_fingers:',
-  ':c3po:',
-  ':pink-unicorn:',
-  ':gir2:',
-  ':linuxterm:',
-  ':porg:',
-  ':r2d2:',
-  ':jenkins:',
-  ':zorak:',
-];
+const slackmoji = {
+  ':yodawg:': 1,
+  ':sea_otter:': 1,
+  ':easy:': 1,
+  ':ewok:': 1,
+  ':doge:': 1,
+  ':badass:': 1,
+  ':crossed_fingers:': 1,
+  ':c3po:': 1,
+  ':pink-unicorn:': 1,
+  ':gir2:': 1,
+  ':linuxterm:': 1,
+  ':porg:': 1,
+  ':r2d2:': 1,
+  ':jenkins:': 8,
+  ':zorak:': 1,
+};
+
+const getConfig = (path) => {
+  const configObj = config();
+  const keys = Object.keys(configObj).filter(key => key.includes('PIPELINE_BRANCH'));
+  const branches = {};
+  keys.forEach((key) => {
+    branches[key] = configObj[key];
+  });
+  return branches;
+};
 
 const postChatMessage = message => new Promise((resolve, reject) => {
   const {
@@ -125,6 +136,21 @@ const checkIAM = async () => {
 
 // Router
 const router = new express.Router();
+// client
+
+export const pages = {
+  '/': 'TIE-bot',
+};
+
+const pagesArray = Object.keys(pages);
+
+router.get(pagesArray, async (req, res) => {
+  const htmlProps = {
+    title: pages[req.path] || '404',
+    bundleUrl: '/static/bundle.js',
+  };
+  res.send(ReactDOMServer.renderToStaticMarkup(<Html {...htmlProps} />));
+});
 
 router.get('/status', (req, res) => res.status(200).send('okay'));
 
@@ -284,6 +310,33 @@ router.post('/slack/command/iam-status', async (req, res) => {
   }
 });
 
+router.get('/slack/command/branches/', async (req, res) => {
+  const branches = getConfig();
+  const messageText = Object.keys(branches).map((branch) => {
+    const shortKey = branch.replace('/PIPELINE_BRANCH', '');
+    return `*dev/${shortKey}*: _${branches[branch]}_\n`;
+  });
+  try {
+    const slackReqObj = req.body;
+    const response = {
+      response_type: 'in_channel',
+      channel: slackReqObj.channel_id,
+      text: ':octocat: *DEV PIPELINE_BRANCHes*',
+      attachments: [{
+        text: messageText,
+        fallback: messageText,
+        mrkdwn_in: ['text'],
+        color: '#2c963f',
+        attachment_type: 'default',
+      }],
+    };
+    return res.json(response);
+  } catch (err) {
+    log.error(err);
+    return res.status(500).send('Something blew up. We\'re looking into it.');
+  }
+});
+
 router.post('/slack/actions', async (req, res) => {
   try {
     const slackReqObj = JSON.parse(req.body.payload);
@@ -309,7 +362,7 @@ router.post('/slack/actions', async (req, res) => {
     const message = {
       responseUrl: slackReqObj.response_url,
       replaceOriginal: false,
-      text: `*TIE-bot Deploy Notification* ${chance.pick(slackmoji)} *${env}-${stack}-${service}*${branch ? ` from branch _${branch}_` : ''} [started by <@${user_id}>]`,
+      text: `*TIE-bot Deploy Notification* ${chance.weighted(Object.keys(slackmoji), Object.values(slackmoji))} *${env}-${stack}-${service}*${branch ? ` from branch _${branch}_` : ''} [started by <@${user_id}>]`,
       attachments: [{
         text: `*${env}-${stack}-${service}* will build and deploy in ${buildDelay} minutes\n${url}`,
         fallback: `*${env}-${stack}-${service}* will build and deploy in ${buildDelay} minutes\n${url}`,
@@ -361,21 +414,5 @@ router.post('/slack/command/bot', async (req, res) => {
   }
 });
 
-
-// client
-
-export const pages = {
-  '/': 'TIE-bot',
-};
-
-const pagesArray = Object.keys(pages);
-
-router.get(pagesArray, async (req, res) => {
-  const htmlProps = {
-    title: pages[req.path] || '404',
-    bundleUrl: '/static/bundle.js',
-  };
-  res.send(ReactDOMServer.renderToStaticMarkup(<Html {...htmlProps} />));
-});
 
 export default router;
