@@ -34,7 +34,7 @@ const slackmoji = {
   ':zorak:': 1,
 };
 
-const getConfig = () => {
+const getPipelineBranches = () => {
   const configObj = config();
   const keys = Object.keys(configObj).filter(key => key.includes('PIPELINE_BRANCH'));
   const branches = {};
@@ -311,7 +311,7 @@ router.post('/slack/command/iam-status', async (req, res) => {
 });
 
 router.post('/slack/command/branches/', async (req, res) => {
-  const branches = getConfig();
+  const branches = getPipelineBranches();
   const messageText = Object.keys(branches).map((branch) => {
     const shortKey = branch.replace('/PIPELINE_BRANCH', '');
     return `*dev/${shortKey}*: _${branches[branch]}_\n`;
