@@ -310,7 +310,7 @@ router.post('/slack/command/iam-status', async (req, res) => {
   }
 });
 
-router.get('/slack/command/branches/', async (req, res) => {
+router.post('/slack/command/branches/', async (req, res) => {
   const branches = getConfig();
   const messageText = Object.keys(branches).map((branch) => {
     const shortKey = branch.replace('/PIPELINE_BRANCH', '');
@@ -364,8 +364,8 @@ router.post('/slack/actions', async (req, res) => {
       replaceOriginal: false,
       text: `*TIE-bot Deploy Notification* ${chance.weighted(Object.keys(slackmoji), Object.values(slackmoji))} *${env}-${stack}-${service}*${branch ? ` from branch _${branch}_` : ''} [started by <@${user_id}>]`,
       attachments: [{
-        text: `*${env}-${stack}-${service}* will build and deploy in ${buildDelay} minutes\n${url}`,
-        fallback: `*${env}-${stack}-${service}* will build and deploy in ${buildDelay} minutes\n${url}`,
+        text: `*${env}-${stack}-${service}* will build and deploy within ${buildDelay} minutes\n${url}`,
+        fallback: `*${env}-${stack}-${service}* will build and deploy within ${buildDelay} minutes\n${url}`,
         color: '#2c963f',
         attachment_type: 'default',
       }],
