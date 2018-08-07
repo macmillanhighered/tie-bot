@@ -15,23 +15,23 @@ const getSubdomain = url => url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5}
 const chance = new Chance();
 
 const buildDelay = 10;
-const slackmoji = [
-  ':yodawg:',
-  ':sea_otter:',
-  ':easy:',
-  ':ewok:',
-  ':doge:',
-  ':badass:',
-  ':crossed_fingers:',
-  ':c3po:',
-  ':pink-unicorn:',
-  ':gir2:',
-  ':linuxterm:',
-  ':porg:',
-  ':r2d2:',
-  ':jenkins:',
-  ':zorak:',
-];
+const slackmoji = {
+  ':yodawg:': 1,
+  ':sea_otter:': 1,
+  ':easy:': 1,
+  ':ewok:': 1,
+  ':doge:': 1,
+  ':badass:': 1,
+  ':crossed_fingers:': 1,
+  ':c3po:': 1,
+  ':pink-unicorn:': 1,
+  ':gir2:': 1,
+  ':linuxterm:': 1,
+  ':porg:': 1,
+  ':r2d2:': 1,
+  ':jenkins:': 8,
+  ':zorak:': 1,
+};
 
 const postChatMessage = message => new Promise((resolve, reject) => {
   const {
@@ -75,12 +75,15 @@ const checkStatus = url => new Promise((resolve, reject) => {
     if (err) reject(err);
     try {
       const parsed = JSON.parse(body) || {};
-      const { status = 'UP', service_name, component_status } = parsed;
+      const {
+        status = 'UP', service_name, component_status, version: serviceVersion,
+      } = parsed;
       resolve({
         status,
         service_name,
         component_status,
         url,
+        version: serviceVersion,
       });
     } catch (error) {
       console.error('error', error);
@@ -101,7 +104,7 @@ const checkStatus = url => new Promise((resolve, reject) => {
 //   });
 // });
 // Check IAM Status
-const checkIAM = async () => {
+const checkStack = async () => {
   const iamUrls = [
     'https://prod-green-iam.prod-mml.cloud/status',
     'https://prod-green-courseware.prod-mml.cloud/status',
@@ -256,12 +259,12 @@ router.post('/slack/command/deploy', async (req, res) => {
 });
 
 router.get('/reports/stack', async (req, res) => {
-  const data = await checkIAM();
+  const data = await checkStack();
   res.json(data);
 });
 
 router.post('/slack/command/iam-status', async (req, res) => {
-  const iam = await checkIAM();
+  const iam = await checkStack();
   const messageText = iam.map(({ status, url }) => `${status === 'UP' ? ':green:' : ':broken_heart:'} *${getSubdomain(url)}* is ${status}${status !== 'UP' ? `\n${url}` : ''}`).join('\n');
   try {
     const slackReqObj = req.body;
