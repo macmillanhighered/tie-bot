@@ -5,11 +5,12 @@ import React from 'react';
 import Chance from 'chance';
 import ReactDOMServer from 'react-dom/server';
 import github from 'octonode';
+// import { config } from './config';
 
 import Html from './Html';
 import { log } from './index';
 
-const { version } = './package.json';
+const { version: packageVersion } = './package.json';
 
 const getSubdomain = url => url.match(/(?:http[s]*:\/\/)*(.*?)\.(?=[^/]*\..{2,5})/i)[1];
 const chance = new Chance();
@@ -32,6 +33,16 @@ const slackmoji = {
   ':jenkins:': 8,
   ':zorak:': 1,
 };
+
+// const getPipelineBranches = () => {
+//   const configObj = config();
+//   const keys = Object.keys(configObj).filter(key => key.includes('PIPELINE_BRANCH'));
+//   const branches = {};
+//   keys.forEach((key) => {
+//     branches[key] = configObj[key];
+//   });
+//   return branches;
+// };
 
 const postChatMessage = message => new Promise((resolve, reject) => {
   const {
@@ -83,7 +94,7 @@ const checkStatus = url => new Promise((resolve, reject) => {
         service_name,
         component_status,
         url,
-        version: serviceVersion,
+        version: serviceVersion || parsed.service_version || null,
       });
     } catch (error) {
       console.error('error', error);
@@ -111,9 +122,15 @@ const checkStack = async () => {
     'https://prod-green-plat.prod-mml.cloud/status',
     'https://prod-green-reading.prod-mml.cloud/status',
     'https://services-live.macmillantech.com/status',
+    'https://int-achieve-preprod-iam.mldev.cloud/status',
+    'https://int-achieve-preprod-plat.mldev.cloud/status',
+    'https://int-achieve-preprod-courseware.mldev.cloud/status',
     'https://int-achieve-iam.mldev.cloud/status',
     'https://int-achieve-plat.mldev.cloud/status',
     'https://int-achieve-courseware.mldev.cloud/status',
+    'https://dev-achieve-uat-iam.mldev.cloud/status',
+    'https://dev-achieve-uat-plat.mldev.cloud/status',
+    'https://dev-achieve-uat-courseware.mldev.cloud/status',
     'https://dev-achieve-courseware.mldev.cloud/status',
     'https://dev-achieve-iam.mldev.cloud/status',
     'https://dev-achieve-plat.mldev.cloud/status',
@@ -265,7 +282,7 @@ router.get('/reports/stack', async (req, res) => {
 
 router.post('/slack/command/iam-status', async (req, res) => {
   const iam = await checkStack();
-  const messageText = iam.map(({ status, url }) => `${status === 'UP' ? ':green:' : ':broken_heart:'} *${getSubdomain(url)}* is ${status}${status !== 'UP' ? `\n${url}` : ''}`).join('\n');
+  const messageText = iam.map(({ status, url, version }) => `${status === 'UP' ? ':green:' : ':broken_heart:'} *${getSubdomain(url)}* is ${status}${status !== 'UP' ? `\n${url}` : ''}${version ? ` :: \`${version}\`` : ''}`).join('\n');
   try {
     const slackReqObj = req.body;
     const response = {
@@ -286,6 +303,35 @@ router.post('/slack/command/iam-status', async (req, res) => {
     return res.status(500).send('Something blew up. We\'re looking into it.');
   }
 });
+/* WIP
+router.get('/slack/command/branches/', async (req, res) => {
+  const branches = getPipelineBranches();
+  const messageText = Object.keys(branches).map((branch) => {
+    const shortKey = branch.replace('/PIPELINE_BRANCH', '');
+    return `*${shortKey}*: _${branches[branch]}_\n`;
+  });
+  try {
+    const slackReqObj = req.body;
+    const response = {
+      response_type: 'in_channel',
+      channel: slackReqObj.channel_id,
+      text: ':octocat: *DEV PIPELINE_BRANCHes*',
+      attachments: [{
+        text: messageText,
+        fallback: messageText,
+        mrkdwn_in: ['text'],
+        color: '#2c963f',
+        attachment_type: 'default',
+      }],
+    };
+    return res.json(response);
+  } catch (err) {
+    log.error(err);
+    return res.status(500).send('Something blew up. We\'re looking into it.');
+  }
+});
+*/
+
 
 router.post('/slack/actions', async (req, res) => {
   try {
@@ -350,7 +396,7 @@ router.post('/slack/command/bot', async (req, res) => {
     return res.json({
       response_type: 'ephemeral',
       channel: slackReqObj.channel_id,
-      text: `TIE-bot Help :: v${version}`,
+      text: `TIE-bot Help :: v${packageVersion}`,
       attachments: [{
         text: helpText,
         mrkdwn: true,
@@ -363,7 +409,6 @@ router.post('/slack/command/bot', async (req, res) => {
     return res.status(500).send('Something blew up. We\'re looking into it.');
   }
 });
-
 
 // client
 
@@ -380,5 +425,6 @@ router.get(pagesArray, async (req, res) => {
   };
   res.send(ReactDOMServer.renderToStaticMarkup(<Html {...htmlProps} />));
 });
+
 
 export default router;
