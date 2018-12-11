@@ -1741,6 +1741,12 @@ constants-browserify@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/constants-browserify/-/constants-browserify-1.0.0.tgz#c20b96d8c617748aaf1c16021760cd27fcb8cb75"
 
+consul@^0.33.1:
+  version "0.33.1"
+  resolved "https://registry.yarnpkg.com/consul/-/consul-0.33.1.tgz#8f8b2b2d39e5e619a6a60a21ee07ba44e02e8bb4"
+  dependencies:
+    papi "^0.28.0"
+
 contains-path@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/contains-path/-/contains-path-0.1.0.tgz#fe8cf184ff6670b6baef01a9d4861a5cbec4120a"
@@ -4372,6 +4378,10 @@ p-try@^1.0.0:
 pako@~1.0.5:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.6.tgz#0101211baa70c4bca4a0f63f2206e97b7dfaf258"
+
+papi@^0.28.0:
+  version "0.28.0"
+  resolved "https://registry.yarnpkg.com/papi/-/papi-0.28.0.tgz#f14fc15fcc7eae4d9fc573fb6960ca1bdc1ccfd0"
 
 parallel-transform@^1.1.0:
   version "1.1.0"

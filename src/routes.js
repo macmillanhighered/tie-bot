@@ -5,7 +5,6 @@ import React from 'react';
 import Chance from 'chance';
 import ReactDOMServer from 'react-dom/server';
 import github from 'octonode';
-// import { config } from './config';
 
 import Html from './Html';
 import { log } from './index';
@@ -33,16 +32,6 @@ const slackmoji = {
   ':jenkins:': 8,
   ':zorak:': 1,
 };
-
-// const getPipelineBranches = () => {
-//   const configObj = config();
-//   const keys = Object.keys(configObj).filter(key => key.includes('PIPELINE_BRANCH'));
-//   const branches = {};
-//   keys.forEach((key) => {
-//     branches[key] = configObj[key];
-//   });
-//   return branches;
-// };
 
 const postChatMessage = message => new Promise((resolve, reject) => {
   const {
@@ -145,6 +134,21 @@ const checkStack = async () => {
 
 // Router
 const router = new express.Router();
+// client
+
+export const pages = {
+  '/': 'TIE-bot',
+};
+
+const pagesArray = Object.keys(pages);
+
+router.get(pagesArray, async (req, res) => {
+  const htmlProps = {
+    title: pages[req.path] || '404',
+    bundleUrl: '/static/bundle.js',
+  };
+  res.send(ReactDOMServer.renderToStaticMarkup(<Html {...htmlProps} />));
+});
 
 router.get('/status', (req, res) => res.status(200).send('okay'));
 
@@ -303,35 +307,6 @@ router.post('/slack/command/iam-status', async (req, res) => {
     return res.status(500).send('Something blew up. We\'re looking into it.');
   }
 });
-/* WIP
-router.get('/slack/command/branches/', async (req, res) => {
-  const branches = getPipelineBranches();
-  const messageText = Object.keys(branches).map((branch) => {
-    const shortKey = branch.replace('/PIPELINE_BRANCH', '');
-    return `*${shortKey}*: _${branches[branch]}_\n`;
-  });
-  try {
-    const slackReqObj = req.body;
-    const response = {
-      response_type: 'in_channel',
-      channel: slackReqObj.channel_id,
-      text: ':octocat: *DEV PIPELINE_BRANCHes*',
-      attachments: [{
-        text: messageText,
-        fallback: messageText,
-        mrkdwn_in: ['text'],
-        color: '#2c963f',
-        attachment_type: 'default',
-      }],
-    };
-    return res.json(response);
-  } catch (err) {
-    log.error(err);
-    return res.status(500).send('Something blew up. We\'re looking into it.');
-  }
-});
-*/
-
 
 router.post('/slack/actions', async (req, res) => {
   try {
@@ -409,22 +384,5 @@ router.post('/slack/command/bot', async (req, res) => {
     return res.status(500).send('Something blew up. We\'re looking into it.');
   }
 });
-
-// client
-
-export const pages = {
-  '/': 'TIE-bot',
-};
-
-const pagesArray = Object.keys(pages);
-
-router.get(pagesArray, async (req, res) => {
-  const htmlProps = {
-    title: pages[req.path] || '404',
-    bundleUrl: '/static/bundle.js',
-  };
-  res.send(ReactDOMServer.renderToStaticMarkup(<Html {...htmlProps} />));
-});
-
 
 export default router;
