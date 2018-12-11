@@ -4,7 +4,6 @@ import http from 'http';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import tracer from 'tracer';
-import { monitor } from './config';
 
 
 import routes from './routes';
@@ -22,9 +21,6 @@ app.start = async () => {
 
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
-
-  await monitor(process.env.CONSUL_PATH);
-
   app.use('/static', express.static('dist'));
   // Routes
   app.use(routes);
