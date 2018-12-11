@@ -83,7 +83,7 @@ const checkStatus = url => new Promise((resolve, reject) => {
         service_name,
         component_status,
         url,
-        version: serviceVersion || parsed.service_version || null,
+        version: serviceVersion || parsed.service_version || parsed.engineering_version || null,
       });
     } catch (error) {
       console.error('error', error);
