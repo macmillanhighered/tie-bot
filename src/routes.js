@@ -249,13 +249,6 @@ router.post('/slack/command/deploy', async (req, res) => {
         callback_id: 'deploy_msg',
         actions: [
           {
-            name: 'build',
-            text: 'Open Deploy Link',
-            type: 'button',
-            value: 'build',
-            url: buildUrl,
-          },
-          {
             name: 'announce',
             text: 'Announce Deploy',
             style: 'primary',
