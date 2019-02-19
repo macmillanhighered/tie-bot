@@ -5,6 +5,7 @@ import React from 'react';
 import Chance from 'chance';
 import ReactDOMServer from 'react-dom/server';
 import github from 'octonode';
+import moment from 'moment';
 
 import Html from './Html';
 import { log } from './index';
@@ -294,6 +295,72 @@ router.post('/slack/command/iam-status', async (req, res) => {
         attachment_type: 'default',
       }],
     };
+    return res.json(response);
+  } catch (err) {
+    log.error(err);
+    return res.status(500).send('Something blew up. We\'re looking into it.');
+  }
+});
+
+const checkLastDeploy = url => new Promise((resolve, reject) => {
+  request.get({ url }, (err, res, body) => {
+    if (err) reject(err);
+    try {
+      const parsed = JSON.parse(body) || {};
+      const {
+        service_name,
+        component_status,
+        version: serviceVersion,
+        install_datetime,
+      } = parsed;
+      resolve({
+        service_name,
+        install_datetime,
+        component_status,
+        url,
+        version: serviceVersion || parsed.service_version || parsed.engineering_version || null,
+      });
+    } catch (error) {
+      console.error('error', error);
+      resolve({
+        status: 'DOWN',
+        error,
+        service_name: url,
+        url,
+      });
+    }
+  });
+});
+
+router.post('/slack/days/:product', async (req, res) => {
+  try {
+    const slackReqObj = JSON.parse(req.body.payload);
+    const { channel } = slackReqObj;
+    const { actions: [action] } = slackReqObj;
+    const {
+      env,
+      stack,
+      service,
+      branch,
+      user_id,
+    } = JSON.parse(action.value);
+    const { version, install_datetime } = await checkLastDeploy('https://iam.macmillanlearning.com/status');
+    const diff = moment(install_datetime).fromNow();
+    let response;
+    if (slackReqObj.callback_id === 'deploy_msg') {
+      response = {
+        response_type: 'in_channel',
+        channel: channel.id,
+        text: `Getting last install for ${env}-${stack}-${service}`,
+      };
+    }
+
+    const message = {
+      responseUrl: slackReqObj.response_url,
+      replaceOriginal: true,
+      text: `*TIE-bot Days Since Deploy* ${chance.weighted(Object.keys(slackmoji), Object.values(slackmoji))} *${env}-${stack}-${service}* ${diff}`,
+    };
+    postChatMessage(message);
     return res.json(response);
   } catch (err) {
     log.error(err);
