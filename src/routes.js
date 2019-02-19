@@ -341,8 +341,6 @@ router.post('/slack/days/:product', async (req, res) => {
       env,
       stack,
       service,
-      branch,
-      user_id,
     } = JSON.parse(action.value);
     const { version, install_datetime } = await checkLastDeploy('https://iam.macmillanlearning.com/status');
     const diff = moment(install_datetime).fromNow();
@@ -358,7 +356,7 @@ router.post('/slack/days/:product', async (req, res) => {
     const message = {
       responseUrl: slackReqObj.response_url,
       replaceOriginal: true,
-      text: `*TIE-bot Days Since Deploy* ${chance.weighted(Object.keys(slackmoji), Object.values(slackmoji))} *${env}-${stack}-${service}* ${diff}`,
+      text: `*TIE-bot Days Since Deploy* ${chance.weighted(Object.keys(slackmoji), Object.values(slackmoji))} *${env}-${stack}-${service}* ${version} ${diff}`,
     };
     postChatMessage(message);
     return res.json(response);
