@@ -33,6 +33,28 @@ const slackmoji = {
   ':jenkins:': 8,
   ':zorak:': 1,
 };
+const iamUrlHash = {
+  'prod-green-iam': 'https://prod-green-iam.prod-mml.cloud/status',
+  'prod-green-courseware': 'https://prod-green-courseware.prod-mml.cloud/status',
+  'prod-green-plat': 'https://prod-green-plat.prod-mml.cloud/status',
+  'prod-green-reading': 'https://prod-green-reading.prod-mml.cloud/status',
+  'services-live.macmillantech': 'https://services-live.macmillantech.com/status',
+  'int-achieve-preprod-iam': 'https://int-achieve-preprod-iam.mldev.cloud/status',
+  'int-achieve-preprod-plat': 'https://int-achieve-preprod-plat.mldev.cloud/status',
+  'int-achieve-preprod-courseware': 'https://int-achieve-preprod-courseware.mldev.cloud/status',
+  'int-achieve-iam': 'https://int-achieve-iam.mldev.cloud/status',
+  'int-achieve-plat': 'https://int-achieve-plat.mldev.cloud/status',
+  'int-achieve-courseware': 'https://int-achieve-courseware.mldev.cloud/status',
+  'dev-achieve-uat-iam': 'https://dev-achieve-uat-iam.mldev.cloud/status',
+  'dev-achieve-uat-plat': 'https://dev-achieve-uat-plat.mldev.cloud/status',
+  'dev-achieve-uat-courseware': 'https://dev-achieve-uat-courseware.mldev.cloud/status',
+  'dev-achieve-courseware': 'https://dev-achieve-courseware.mldev.cloud/status',
+  'dev-achieve-iam': 'https://dev-achieve-iam.mldev.cloud/status',
+  'dev-achieve-plat': 'https://dev-achieve-plat.mldev.cloud/status',
+  'dev-tie-iam': 'https://dev-tie-iam.mldev.cloud/status',
+  'dev-tie-plat': 'https://dev-tie-plat.mldev.cloud/status',
+  'dev-tie-courseware': 'https://dev-tie-courseware.mldev.cloud/status',
+};
 
 const postChatMessage = message => new Promise((resolve, reject) => {
   const {
@@ -77,7 +99,11 @@ const checkStatus = url => new Promise((resolve, reject) => {
     try {
       const parsed = JSON.parse(body) || {};
       const {
-        status = 'UP', service_name, component_status, version: serviceVersion,
+        status = 'UP',
+        service_name,
+        component_status,
+        install_datetime,
+        version: serviceVersion,
       } = parsed;
       resolve({
         status,
@@ -85,6 +111,7 @@ const checkStatus = url => new Promise((resolve, reject) => {
         component_status,
         url,
         version: serviceVersion || parsed.service_version || parsed.engineering_version || null,
+        install_datetime,
       });
     } catch (error) {
       console.error('error', error);
@@ -106,28 +133,7 @@ const checkStatus = url => new Promise((resolve, reject) => {
 // });
 // Check IAM Status
 const checkStack = async () => {
-  const iamUrls = [
-    'https://prod-green-iam.prod-mml.cloud/status',
-    'https://prod-green-courseware.prod-mml.cloud/status',
-    'https://prod-green-plat.prod-mml.cloud/status',
-    'https://prod-green-reading.prod-mml.cloud/status',
-    'https://services-live.macmillantech.com/status',
-    'https://int-achieve-preprod-iam.mldev.cloud/status',
-    'https://int-achieve-preprod-plat.mldev.cloud/status',
-    'https://int-achieve-preprod-courseware.mldev.cloud/status',
-    'https://int-achieve-iam.mldev.cloud/status',
-    'https://int-achieve-plat.mldev.cloud/status',
-    'https://int-achieve-courseware.mldev.cloud/status',
-    'https://dev-achieve-uat-iam.mldev.cloud/status',
-    'https://dev-achieve-uat-plat.mldev.cloud/status',
-    'https://dev-achieve-uat-courseware.mldev.cloud/status',
-    'https://dev-achieve-courseware.mldev.cloud/status',
-    'https://dev-achieve-iam.mldev.cloud/status',
-    'https://dev-achieve-plat.mldev.cloud/status',
-    'https://dev-tie-iam.mldev.cloud/status',
-    'https://dev-tie-plat.mldev.cloud/status',
-    'https://dev-tie-courseware.mldev.cloud/status',
-  ];
+  const iamUrls = Object.values(iamUrlHash);
   const promises = await iamUrls.map(async url => checkStatus(url));
   const allPromises = await Promise.all(promises);
   return allPromises;
@@ -280,7 +286,18 @@ router.get('/reports/stack', async (req, res) => {
 
 router.post('/slack/command/iam-status', async (req, res) => {
   const iam = await checkStack();
-  const messageText = iam.map(({ status, url, version }) => `${status === 'UP' ? ':green:' : ':broken_heart:'} *${getSubdomain(url)}* is ${status}${status !== 'UP' ? `\n${url}` : ''}${version ? ` :: \`${version}\`` : ''}`).join('\n');
+  const messageText = iam.map(({
+    status,
+    url,
+    version,
+    install_datetime,
+  }) => {
+    const statusMoji = status === 'UP' ? ':green:' : ':broken_heart:';
+    const isUp = `*${getSubdomain(url)}* is ${status}`;
+    const thang = `${status !== 'UP' ? `\n${url}` : ''}${version ? ` :: \`${version}\`` : ''}`;
+    const deployed = install_datetime ? `[deployed ${moment(install_datetime).fromNow()}]` : '';
+    return `${statusMoji} ${isUp}${thang} ${deployed}`;
+  }).join('\n');
   try {
     const slackReqObj = req.body;
     const response = {
@@ -332,31 +349,35 @@ const checkLastDeploy = url => new Promise((resolve, reject) => {
   });
 });
 
-router.post('/slack/days/:product', async (req, res) => {
+router.post('/slack/days', async (req, res) => {
   try {
-    const slackReqObj = JSON.parse(req.body.payload);
-    const { channel } = slackReqObj;
-    const { actions: [action] } = slackReqObj;
+    console.log('payload', req.body);
     const {
-      env,
-      stack,
-      service,
-    } = JSON.parse(action.value);
-    const { version, install_datetime } = await checkLastDeploy('https://iam.macmillanlearning.com/status');
+      text,
+      channel_id,
+      // channel_name,
+      // user_id,
+      // user_name,
+      service_name,
+      response_url,
+    } = req.body;
+
+    // const split = text.split('-');
+    // const [env, stack, product] = split;
+    const statusURL = iamUrlHash[text] || 'https://iam.macmillanlearning.com/status';
+    console.log('statusURL', statusURL);
+    const { version, install_datetime } = await checkLastDeploy(statusURL);
     const diff = moment(install_datetime).fromNow();
-    let response;
-    if (slackReqObj.callback_id === 'deploy_msg') {
-      response = {
-        response_type: 'in_channel',
-        channel: channel.id,
-        text: `Getting last install for ${env}-${stack}-${service}`,
-      };
-    }
+    const response = {
+      response_type: 'in_channel',
+      channel: channel_id,
+      text: `Getting last install for ${text}/${service_name}`,
+    };
 
     const message = {
-      responseUrl: slackReqObj.response_url,
+      responseUrl: response_url,
       replaceOriginal: true,
-      text: `*TIE-bot Days Since Deploy* ${chance.weighted(Object.keys(slackmoji), Object.values(slackmoji))} *${env}-${stack}-${service}* ${version} ${diff}`,
+      text: `*TIE-bot Days Since Deploy* ${chance.weighted(Object.keys(slackmoji), Object.values(slackmoji))}: *${text}* _${version}_ deployed ${diff}`,
     };
     postChatMessage(message);
     return res.json(response);
