@@ -9,6 +9,7 @@ import moment from 'moment';
 
 import Html from './Html';
 import { log } from './index';
+import { filterStackArray, stackUrlHash } from './utils';
 
 const { version: packageVersion } = './package.json';
 
@@ -32,28 +33,6 @@ const slackmoji = {
   ':r2d2:': 1,
   ':jenkins:': 8,
   ':zorak:': 1,
-};
-const iamUrlHash = {
-  'prod-green-iam': 'https://prod-green-iam.prod-mml.cloud/status',
-  'prod-green-courseware': 'https://prod-green-courseware.prod-mml.cloud/status',
-  'prod-green-plat': 'https://prod-green-plat.prod-mml.cloud/status',
-  'prod-green-reading': 'https://prod-green-reading.prod-mml.cloud/status',
-  'services-live.macmillantech': 'https://services-live.macmillantech.com/status',
-  'int-achieve-preprod-iam': 'https://int-achieve-preprod-iam.mldev.cloud/status',
-  'int-achieve-preprod-plat': 'https://int-achieve-preprod-plat.mldev.cloud/status',
-  'int-achieve-preprod-courseware': 'https://int-achieve-preprod-courseware.mldev.cloud/status',
-  'int-achieve-iam': 'https://int-achieve-iam.mldev.cloud/status',
-  'int-achieve-plat': 'https://int-achieve-plat.mldev.cloud/status',
-  'int-achieve-courseware': 'https://int-achieve-courseware.mldev.cloud/status',
-  'dev-achieve-uat-iam': 'https://dev-achieve-uat-iam.mldev.cloud/status',
-  'dev-achieve-uat-plat': 'https://dev-achieve-uat-plat.mldev.cloud/status',
-  'dev-achieve-uat-courseware': 'https://dev-achieve-uat-courseware.mldev.cloud/status',
-  'dev-achieve-courseware': 'https://dev-achieve-courseware.mldev.cloud/status',
-  'dev-achieve-iam': 'https://dev-achieve-iam.mldev.cloud/status',
-  'dev-achieve-plat': 'https://dev-achieve-plat.mldev.cloud/status',
-  'dev-tie-iam': 'https://dev-tie-iam.mldev.cloud/status',
-  'dev-tie-plat': 'https://dev-tie-plat.mldev.cloud/status',
-  'dev-tie-courseware': 'https://dev-tie-courseware.mldev.cloud/status',
 };
 
 const postChatMessage = message => new Promise((resolve, reject) => {
@@ -132,9 +111,11 @@ const checkStatus = url => new Promise((resolve, reject) => {
 //   });
 // });
 // Check IAM Status
-const checkStack = async () => {
-  const iamUrls = Object.values(iamUrlHash);
-  const promises = await iamUrls.map(async url => checkStatus(url));
+
+const checkStack = async (text) => {
+  const filteredUrlArray = filterStackArray(Object.values(stackUrlHash), text);
+  const statusUrls = filteredUrlArray;
+  const promises = await statusUrls.map(async url => checkStatus(url));
   const allPromises = await Promise.all(promises);
   return allPromises;
 };
@@ -285,7 +266,8 @@ router.get('/reports/stack', async (req, res) => {
 });
 
 router.post('/slack/command/iam-status', async (req, res) => {
-  const iam = await checkStack();
+  const { body: { text } } = req;
+  const iam = await checkStack(text);
   const messageText = iam.map(({
     status,
     url,
@@ -364,7 +346,7 @@ router.post('/slack/days', async (req, res) => {
 
     // const split = text.split('-');
     // const [env, stack, product] = split;
-    const statusURL = iamUrlHash[text] || 'https://iam.macmillanlearning.com/status';
+    const statusURL = stackUrlHash[text] || 'https://iam.macmillanlearning.com/status';
     console.log('statusURL', statusURL);
     const { version, install_datetime } = await checkLastDeploy(statusURL);
     const diff = moment(install_datetime).fromNow();

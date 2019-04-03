@@ -10,6 +10,7 @@
     "deploy": "git push dokku master",
     "logs": "dt logs -t",
     "lint": "eslint src --fix",
+    "test": "mocha -w --require babel-core/register --watch-extension .js",
     "client-dev": "webpack-dev-server --mode development --history-api-fallback --content-base src/client/static/",
     "client-build": "BABEL_DISABLE_CACHE=1 webpack --config webpack.config.babel.js --mode production"
   },
@@ -119,5 +120,10 @@
         }
       ]
     }
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0"
   }
 }
