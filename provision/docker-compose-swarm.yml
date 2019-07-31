@@ -1,6 +1,6 @@
 version: "3.4"
 services:
-  iam:
+  tie-bot:
     image: ${CONTAINER_IMAGE}
     env_file:
       - .env
