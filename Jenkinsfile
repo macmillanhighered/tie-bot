@@ -27,11 +27,8 @@ pipeline {
           container_image = docker.build("${image_name}:${version_tag}")
 	  
           sh """
-            mkdir -p artifacts
-            touch .images
+            cp -R provision artifacts
             echo CONTAINER_IMAGE=${container_image.id} >> artifacts/.images
-            cp provision/docker-compose-swarm.yml artifacts/
-            cp provision/.key  artifacts/.key
           """
 
         }
@@ -41,7 +38,7 @@ pipeline {
     stage ('Publish Artifacts') {
       steps {
 	script {
-
+	  sh "ls -la ; ls -la artifacts"
           def uploadSpec = """{
                         "files": [
                             {
