@@ -12,7 +12,6 @@ pipeline {
   agent any
   stages {
     stage ('Prepare Artifacts') {
-      agent any
       steps {
         script {
           def scmVars = checkout scm
@@ -29,6 +28,7 @@ pipeline {
           sh """
             cp -R provision artifacts
             echo CONTAINER_IMAGE=${container_image.id} >> artifacts/.images
+          
           """
 
         }
@@ -38,7 +38,6 @@ pipeline {
     stage ('Publish Artifacts') {
       steps {
 	script {
-	  sh "ls -la ; ls -la artifacts"
           def uploadSpec = """{
                         "files": [
                             {
