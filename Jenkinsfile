@@ -1,11 +1,8 @@
-def service = params.SERVICE_NAME
-
-
 def artifactory_server = Artifactory.server 'Macmillan-Artifactory'
 def rtDocker = Artifactory.docker server: artifactory_server
 
-def artifactory_target = 'Macmillan-Product-Builds/${service}'
-def image_name = "${params.ARTIFACTORY_DOCKER_REGISTRY}/${params.SERVICE}"
+def artifactory_target = "Macmillan-Product-Builds/${params.SERVICE_NAME}"
+def image_name = "${params.ARTIFACTORY_DOCKER_REGISTRY}/${params.SERVICE_NAME}"
 
 def version_tag
 def container_image
@@ -26,7 +23,7 @@ pipeline {
           }
 	  
           
-          echo "building service:${env.BUILD_ID} with tag ${version_tag}"
+          echo "building ${env.BUILD_ID} with tag ${version_tag}"
           container_image = docker.build("${image_name}:${version_tag}")
 	  
           sh """
