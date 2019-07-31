@@ -42,7 +42,7 @@ pipeline {
                         "files": [
                             {
                                 "pattern": "./artifacts/*",
-                                "target": "${artifactory_target}"
+                                "target": "${artifactory_target}/${version_tag}/"
                             }
                         ]
                     }"""
@@ -53,9 +53,6 @@ pipeline {
 	    targetRepo: params.DOCKER_REGISTRY_NAME
 	  )
 	  artifactory_server.publishBuildInfo buildInfo
-
-	  artifactory_target = "${artifactory_target}/${version_tag}/"
-
           artifactory_server.upload(uploadSpec)
 
 	  
