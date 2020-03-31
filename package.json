@@ -12,7 +12,9 @@
     "lint": "eslint src --fix",
     "test": "mocha -w --require babel-core/register --watch-extension .js",
     "client-dev": "webpack-dev-server --mode development --history-api-fallback --content-base src/client/static/",
-    "client-build": "BABEL_DISABLE_CACHE=1 webpack --config webpack.config.babel.js --mode production"
+    "client-build": "BABEL_DISABLE_CACHE=1 webpack --config webpack.config.babel.js --mode development",
+    "heroku-postbuild": "yarn build",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",

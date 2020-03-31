@@ -1,0 +1,17 @@
+version: "3.4"
+services:
+  tie-bot:
+    image: ${CONTAINER_IMAGE}
+    env_file:
+      - .env
+    ports:
+      - "5000"
+    entrypoint: yarn start
+    deploy:
+      mode: replicated
+      replicas: ${REPLICAS:-2}
+      update_config:
+        parallelism: 1
+        delay: 5s
+      placement:
+        constraints: [node.role == worker]
