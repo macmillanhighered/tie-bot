@@ -1,7 +1,7 @@
 version: "3.4"
 services:
   tie-bot:
-    image: ${CONTAINER_IMAGE}
+    image: ${tie-bot_IMAGE}
     env_file:
       - .env
     ports:
