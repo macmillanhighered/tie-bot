@@ -11,7 +11,7 @@ def artifactory_target
 def image_name = "${params.ARTIFACTORY_DOCKER_REGISTRY}/${params.SERVICE_NAME}"
 
 def container_image
-
+def artifact_name = "./provision/*"
 
 pipeline {
   agent any
