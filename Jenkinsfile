@@ -67,16 +67,6 @@ pipeline {
                       }"""
             artifactory_server.upload(uploadSpec)
           }
-
-
-          echo "building ${env.BUILD_ID} image ${image_name} with tag ${tag}"
-          container_image = docker.build("${image_name}:${tag}")
-	  
-          sh """
-            cp -R provision artifacts
-            echo CONTAINER_IMAGE=${container_image.id} >> artifacts/.images
-          """
-
         }
       }
     }
