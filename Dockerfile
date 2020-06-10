@@ -1,6 +1,10 @@
 FROM node:12-alpine
 
-WORKDIR /app
+# Create app directory
+RUN mkdir -p /usr/src/app
+CMD echo 127.0.0.1  iam-local.mldev.cloud >> /etc/hosts;
+WORKDIR /usr/src/app
+
 COPY yarn.lock .
 COPY package*.json .
 
