@@ -1,7 +1,7 @@
 def artifactory_server = Artifactory.server 'Macmillan-Artifactory'
 def rtDocker = Artifactory.docker server: artifactory_server
 
-def artifactory_target = "Macmillan-Product-Builds/${params.SERVICE_NAME}"
+def artifactory_target = "Macmillan-Product-Builds/tie-bot/${tag}/"
 def image_name = "${params.ARTIFACTORY_DOCKER_REGISTRY}/${params.SERVICE_NAME}"
 
 def version_tag
@@ -42,7 +42,7 @@ pipeline {
                         "files": [
                             {
                                 "pattern": "./artifacts/*",
-                                "target": "${artifactory_target}/${version_tag}/"
+                                "target": "${artifactory_target}sha"
                             }
                         ]
                     }"""
