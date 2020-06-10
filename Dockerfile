@@ -8,6 +8,7 @@ RUN yarn
 
 COPY . .
 RUN yarn build
+RUN yarn client-build
 
 EXPOSE 5000
 

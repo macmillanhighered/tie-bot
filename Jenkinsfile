@@ -8,7 +8,6 @@ def artifactory_server = Artifactory.server 'Macmillan-Artifactory'
 def rtDocker = Artifactory.docker server: artifactory_server
 def app_name = "tie-bot"
 def artifactory_target
-def image_name = "${params.ARTIFACTORY_DOCKER_REGISTRY}/${params.SERVICE_NAME}"
 
 def container_image
 def artifact_name = "./provision/*"
