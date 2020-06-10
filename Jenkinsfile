@@ -1,7 +1,7 @@
 def artifactory_server = Artifactory.server 'Macmillan-Artifactory'
 def rtDocker = Artifactory.docker server: artifactory_server
 
-def artifactory_target = "Macmillan-Product-Builds/tie-bot/${tag}/"
+def artifactory_target
 def image_name = "${params.ARTIFACTORY_DOCKER_REGISTRY}/${params.SERVICE_NAME}"
 
 def version_tag
@@ -20,6 +20,7 @@ pipeline {
           if ("${version_tag}" == "null" || "${version_tag}" == "") {
             version_tag = scmVars.GIT_BRANCH.replaceFirst(/^.*\//, "")
           }
+          artifactory_target = "Macmillan-Product-Builds/tie-bot/${version_tag}/"
 	  
           
           echo "building ${env.BUILD_ID} with tag ${version_tag}"
