@@ -29,7 +29,7 @@ pipeline {
           artifactory_target = "Macmillan-Product-Builds/tie-bot/${version_tag}/"
 	  
           
-          echo "building ${env.BUILD_ID} with tag ${version_tag}"
+          echo "building ${env.BUILD_ID} image ${image_name} with tag ${version_tag}"
           container_image = docker.build("${image_name}:${version_tag}")
 	  
           sh """
