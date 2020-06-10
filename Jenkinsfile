@@ -1,3 +1,9 @@
+import jenkins.model.*;
+import groovy.json.*;
+import hudson.*;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 def artifactory_server = Artifactory.server 'Macmillan-Artifactory'
 def rtDocker = Artifactory.docker server: artifactory_server
 
@@ -35,34 +41,28 @@ pipeline {
         }
       }
     }
-
     stage ('Publish Artifacts') {
       steps {
-	script {
+        script {
           def uploadSpec = """{
                         "files": [
                             {
-                                "pattern": "./artifacts/*",
-                                "target": "${artifactory_target}sha"
+                                "pattern": "./provision/*",
+                                "target": "${artifactory_target}"
                             }
                         ]
                     }"""
 
 	  
-	  def buildInfo = rtDocker.push(
-	    image: container_image.id,
-	    targetRepo: params.DOCKER_REGISTRY_NAME
-	  )
-	  artifactory_server.publishBuildInfo buildInfo
+          def buildInfo = rtDocker.push(
+            image: container_image.id,
+            targetRepo: params.DOCKER_REGISTRY_NAME
+          )
+          artifactory_server.publishBuildInfo buildInfo
           artifactory_server.upload(uploadSpec)
-
-	  
-	}
+        }
       }
     }
-
-    
-    
   }
   post {
     always {
