@@ -216,7 +216,7 @@ router.post('/slack/command/deploy', async (req, res) => {
   const service = serviceSplitArray.join('');
   let rootUrl = `http://jenkins.mldev.cloud/job/TIE/job/${service}%20deploy/`;
   if (!['plat', 'iam', 'courseware'].includes(stack)) {
-    rootUrl = 'http://jenkins.mldev.cloud/job/SRE/job/Unified_Deploy_Pipeline/';
+    rootUrl = 'http://jenkins.mldev.cloud/job/SRE_Supported/job/Unified_Deploy_Pipeline/';
   }
   const buildUrl = `${rootUrl}build?delay=${buildDelay}sec`;
   // it is potentially possible to pass the build params and
