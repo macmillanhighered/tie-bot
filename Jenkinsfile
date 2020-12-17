@@ -50,7 +50,7 @@ pipeline {
               buildImage.push(tag)
             }
             writeFile file: "${env.WORKSPACE}/provision/sha".toString(), text: "${scmVars.GIT_COMMIT}".toString()
-            def serviceImage = "${app_name}_IMAGE=docker-dev.registry.sh.mml.cloud/${app_name}:${tag}"
+            def serviceImage = "TIE_BOT_IMAGE=docker-dev.registry.sh.mml.cloud/${app_name}:${tag}"
             sh (
               """ echo ${serviceImage} > ./provision/.images
               """
