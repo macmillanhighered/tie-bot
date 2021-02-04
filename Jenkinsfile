@@ -8,7 +8,7 @@ def artifactory_server = Artifactory.server 'Macmillan-Artifactory'
 def rtDocker = Artifactory.docker server: artifactory_server
 def app_name = "tie-bot"
 def artifactory_target
-def dockerRepo = '652911386828.dkr.ecr.us-east-1.amazonaws.com/cr/'
+def dockerRepo = '652911386828.dkr.ecr.us-east-1.amazonaws.com/cs/'
 def buildType = 'dev'
 def container_image
 def artifact_name = "./provision/*"
