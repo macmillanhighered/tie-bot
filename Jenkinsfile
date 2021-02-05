@@ -32,6 +32,7 @@ pipeline {
 
           // build a unique, prefixed tag which includes human readable description
           dockerTag = "${buildType}-${tag}-${shortCommit}"
+          tiebotImage = "${dockerRepo}${app_name}:${dockerTag}"
 
           artifactory_target = "Macmillan-Product-Builds/${app_name}/${tag}/"
           
@@ -64,18 +65,18 @@ pipeline {
 
             echo "No prior build matches current commit in this location, running build"
             echo "building ${app_name}:${env.BUILD_ID} with tag ${dockerTag}"
-            def buildImage = docker.build("${dockerRepo}${app_name}:${dockerTag}")
+            docker.build("${tiebotImage}")
             sh """
               aws ecr get-login-password \\
               --region us-east-1 \\
               | docker login \\
               --username AWS \\
               --password-stdin 652911386828.dkr.ecr.us-east-1.amazonaws.com
-              docker push ${dockerRepo}${app_name}:${dockerTag}
+              docker push ${tiebotImage}
             """
 
             writeFile file: "${env.WORKSPACE}/provision/sha".toString(), text: "${dockerTag}".toString()
-            def serviceImage = "TIE_BOT_IMAGE=${dockerRepo}${app_name}:${dockerTag}"
+            def serviceImage = "TIE_BOT_IMAGE=${tiebotImage}"
             sh (
               """ echo ${serviceImage} > ./provision/.images
               """
