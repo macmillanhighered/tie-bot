@@ -8,12 +8,16 @@ def artifactory_server = Artifactory.server 'Macmillan-Artifactory'
 def rtDocker = Artifactory.docker server: artifactory_server
 def app_name = "tie-bot"
 def artifactory_target
-
+def dockerRepo = '652911386828.dkr.ecr.us-east-1.amazonaws.com/cs/'
+def buildType = 'dev'
 def container_image
 def artifact_name = "./provision/*"
 
 pipeline {
   agent any
+  options {
+    ansiColor('xterm')
+  }
   stages {
     stage ('Prepare Artifacts') {
       steps {
@@ -24,6 +28,12 @@ pipeline {
           if ("${tag}" == "null" || "${tag}" == "") {
             tag = scmVars.GIT_BRANCH.replaceFirst(/^.*\//, "")
           }
+          def shortCommit = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+
+          // build a unique, prefixed tag which includes human readable description
+          dockerTag = "${buildType}-${tag}-${shortCommit}"
+          tiebotImage = "${dockerRepo}${app_name}:${dockerTag}"
+
           artifactory_target = "Macmillan-Product-Builds/${app_name}/${tag}/"
           
           def downloadSpec = """{
@@ -41,16 +51,32 @@ pipeline {
             existingSHA = readFile file: "${env.WORKSPACE}/${app_name}/${tag}/sha".toString()
           }
 
-          if ( existingSHA != scmVars.GIT_COMMIT ) {
-            echo "No prior build matches current commit in this location, running build"
-            echo "building ${app_name}:${env.BUILD_ID} with tag ${tag}"
-            def buildImage
-            docker.withRegistry('https://docker-dev.registry.sh.mml.cloud', 'artifactory-jenkins-user') {
-              buildImage = docker.build("${app_name}:${scmVars.GIT_COMMIT}")
-              buildImage.push(tag)
+          if ( existingSHA != dockerTag ) {
+
+            // Login to Dockerhub
+            withCredentials([
+              usernamePassword(credentialsId: 'Docker_Hub_Login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
+            ])
+            {
+                sh '''
+                    docker login -u $USERNAME -p $PASSWORD
+                '''
             }
-            writeFile file: "${env.WORKSPACE}/provision/sha".toString(), text: "${scmVars.GIT_COMMIT}".toString()
-            def serviceImage = "${app_name}_IMAGE=docker-dev.registry.sh.mml.cloud/${app_name}:${tag}"
+
+            echo "No prior build matches current commit in this location, running build"
+            echo "building ${app_name}:${env.BUILD_ID} with tag ${dockerTag}"
+            docker.build("${tiebotImage}")
+            sh """
+              aws ecr get-login-password \\
+              --region us-east-1 \\
+              | docker login \\
+              --username AWS \\
+              --password-stdin 652911386828.dkr.ecr.us-east-1.amazonaws.com
+              docker push ${tiebotImage}
+            """
+
+            writeFile file: "${env.WORKSPACE}/provision/sha".toString(), text: "${dockerTag}".toString()
+            def serviceImage = "TIE_BOT_IMAGE=${tiebotImage}"
             sh (
               """ echo ${serviceImage} > ./provision/.images
               """
