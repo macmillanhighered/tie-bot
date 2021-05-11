@@ -261,26 +261,31 @@ router.post('/slack/command/deploy', async (req, res) => {
 });
 
 router.get('/reports/stack', async (req, res) => {
-  const data = await checkStack();
-  res.json(data);
+  try {
+    const data = await checkStack();
+    res.json(data);
+  } catch (e) {
+    res.body({error: `unexpected error: ${e}`});
+    res.status(500)
+  }
 });
 
 router.post('/slack/command/iam-status', async (req, res) => {
-  const { body: { text } } = req;
-  const iam = await checkStack(text);
-  const messageText = iam.map(({
-    status,
-    url,
-    version,
-    install_datetime,
-  }) => {
-    const statusMoji = status === 'UP' ? ':green:' : ':broken_heart:';
-    const isUp = `*${getSubdomain(url)}* is ${status}`;
-    const thang = `${status !== 'UP' ? `\n${url}` : ''}${version ? ` :: \`${version}\`` : ''}`;
-    const deployed = install_datetime ? `[deployed ${moment(install_datetime).fromNow()}]` : '';
-    return `${statusMoji} ${isUp}${thang} ${deployed}`;
-  }).join('\n');
   try {
+    const { body: { text } } = req;
+    const iam = await checkStack(text);
+    const messageText = iam.map(({
+      status,
+      url,
+      version,
+      install_datetime,
+    }) => {
+      const statusMoji = status === 'UP' ? ':green:' : ':broken_heart:';
+      const isUp = `*${getSubdomain(url)}* is ${status}`;
+      const thang = `${status !== 'UP' ? `\n${url}` : ''}${version ? ` :: \`${version}\`` : ''}`;
+      const deployed = install_datetime ? `[deployed ${moment(install_datetime).fromNow()}]` : '';
+      return `${statusMoji} ${isUp}${thang} ${deployed}`;
+    }).join('\n');
     const slackReqObj = req.body;
     const response = {
       response_type: 'in_channel',
@@ -412,7 +417,10 @@ router.post('/slack/actions', async (req, res) => {
 
 
 router.post('/slack/command/bot', async (req, res) => {
+
+console.log('BODY', req.body)
   const { body: { text } } = req;
+  console.log('TEXT: ', text)
   let helpText = '*/tie-deploy [env]-[stack]-[service]:[branch]*';
   helpText += '\n • e.g. `/tie-deploy int-achieve-iam:master`';
   helpText += '\n • Displays links to delayed build and automated announcement message.';
